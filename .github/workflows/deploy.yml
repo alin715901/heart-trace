@@ -23,13 +23,14 @@ jobs:
 
       - name: Install and Build
         run: |
+          cd 心迹-源码
           npm install
           npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: 心迹-源码/dist
 
   deploy:
     needs: build
