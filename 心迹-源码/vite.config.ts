@@ -6,6 +6,7 @@ import process from "process"
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/heart-trace/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
