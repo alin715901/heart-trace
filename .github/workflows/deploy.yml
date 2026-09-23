@@ -1,47 +1,47 @@
-姓名: 部署到GitHub页面
+name: Deploy to GitHub Pages
 
-在……之上:
-推:
-分支机构: [主要的]
+on:
+  push:
+    branches: [main]
 
-权限:
-内容: 读
-页面: 写
-id-token: 写
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-工作:
-建立:
-连续的: Ubuntu-最新
-步骤:
-      - 姓名: 结帐
-uses: 操作/结帐@v4
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
--姓名：解压缩源
-跑: unzip-o心迹-源码.zip-数据源
+      - name: Unzip source
+        run: unzip -o 心迹-源码.zip -d source
 
--姓名: 设置节点
-uses: 操作/设置-节点@v4
-和……一起:
-节点版本: 20
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
--姓名: 安装和生成
-跑: |
-CD源
-npm安装
-npm运行生成
+      - name: Install and Build
+        run: |
+          cd source
+          npm install
+          npm run build
 
--姓名: 上传工件
-uses: action/upload-pages-artifact@v3
-和……一起:
-路径: 来源/分发
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: source/dist
 
-部署:
-需要: 建立
-连续的: Ubuntu-最新
-环境:
-姓名: github-pages
-URL: ${{steps.deployment.outputs.page_url}}
-步骤:
-      - 姓名: 部署到GitHub页面
-身份标识: 部署
-uses: 操作/部署页面@v4
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
