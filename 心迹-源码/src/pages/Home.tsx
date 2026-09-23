@@ -93,7 +93,7 @@ export default function Home() {
         </Button>
       )}
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-hidden">
         {!activeEntity ? (
           <Welcome
             onCreate={() => setEntityDialog({ open: true })}
@@ -151,9 +151,9 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
   }
 
   return (
-    <div className="mx-auto flex min-h-full max-w-4xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto flex h-full max-w-4xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">
       {/* 主体头部 */}
-      <header className="alpha-card flex flex-col gap-4 rounded-2xl p-5">
+      <header className="alpha-card flex shrink-0 flex-col gap-4 rounded-2xl p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
             <span
@@ -234,9 +234,9 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
       </header>
 
       {/* 内容区 */}
-      <Tabs value={tab} onValueChange={setTab} className="flex flex-col gap-4">
+      <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col gap-4">
         <TabsList
-          className="self-start"
+          className="self-start shrink-0"
           style={{
             background:
               'color-mix(in oklab, var(--card) var(--glass-alpha, 78%), transparent)',
@@ -246,10 +246,10 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
           <TabsTrigger value="flow">记录流</TabsTrigger>
           <TabsTrigger value="analysis">分析</TabsTrigger>
         </TabsList>
-        <TabsContent value="flow" className="mt-0">
+        <TabsContent value="flow" className="mt-0 flex min-h-0 flex-col">
           <RecordFlow entity={entity} />
         </TabsContent>
-        <TabsContent value="analysis" className="mt-0">
+        <TabsContent value="analysis" className="mt-0 min-h-0 overflow-y-auto">
           <Analysis entity={entity} />
         </TabsContent>
       </Tabs>

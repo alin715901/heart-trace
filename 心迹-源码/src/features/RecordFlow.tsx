@@ -136,8 +136,8 @@ export function RecordFlow({ entity }: RecordFlowProps) {
   ]
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative">
+    <div className="flex h-full flex-col gap-4">
+      <div className="relative shrink-0">
         <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
         <input
           value={query}
@@ -158,7 +158,7 @@ export function RecordFlow({ entity }: RecordFlowProps) {
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         {filters.map((f) => (
           <button
             key={f.key}
@@ -189,73 +189,75 @@ export function RecordFlow({ entity }: RecordFlowProps) {
         )}
       </div>
 
-      {items.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 py-14 text-center">
-          <History className="size-8 text-muted-foreground/60" />
-          <p className="text-sm text-muted-foreground">
-            {searching
-              ? '没有匹配的记录，换个关键词试试'
-              : filter === 'all'
-                ? '还没有记录，使用上方按钮开始记录'
-                : filter === 'status'
-                  ? '还没有状态记录'
-                  : '还没有占卜记录'}
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-5">
-          {months.map((month) => {
-            const monthOpen = searching || !collapsedMonths.has(month.key)
-            return (
-              <section key={month.key} className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => toggleMonth(month.key)}
-                  className="flex w-fit items-center gap-2 rounded-lg px-1 py-0.5 text-muted-foreground transition-colors hover:text-foreground"
-                  aria-expanded={monthOpen}
-                >
-                  <ChevronDown
-                    className={cn('size-4 transition-transform', !monthOpen && '-rotate-90')}
-                  />
-                  <span className="font-serif-x text-base font-semibold text-foreground">
-                    {month.label}
-                  </span>
-                  <span className="text-xs">{month.items.length} 条</span>
-                </button>
-                {monthOpen && (
-                  <ul className="flex flex-col gap-3">
-                    {month.items.map((item) => {
-                      const key = `${item.kind}-${item.data.id}`
-                      const isOpen = expanded.has(key)
-                      return item.kind === 'status' ? (
-                        <StatusCard
-                          key={key}
-                          record={item.data}
-                          expanded={isOpen}
-                          onToggle={() => toggleExpanded(key)}
-                          onOpenImage={(i) => openViewer(item.data.images ?? [], i)}
-                          onEdit={() => setEditStatus(item.data)}
-                          onDelete={() => handleDelete('status', item.data.id)}
-                        />
-                      ) : (
-                        <DivinationCard
-                          key={key}
-                          record={item.data}
-                          expanded={isOpen}
-                          onToggle={() => toggleExpanded(key)}
-                          onOpenImage={(i) => openViewer(item.data.images ?? [], i)}
-                          onEdit={() => setEditDivination(item.data)}
-                          onDelete={() => handleDelete('divination', item.data.id)}
-                        />
-                      )
-                    })}
-                  </ul>
-                )}
-              </section>
-            )
-          })}
-        </div>
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {items.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/60 py-14 text-center">
+            <History className="size-8 text-muted-foreground/60" />
+            <p className="text-sm text-muted-foreground">
+              {searching
+                ? '没有匹配的记录，换个关键词试试'
+                : filter === 'all'
+                  ? '还没有记录，使用上方按钮开始记录'
+                  : filter === 'status'
+                    ? '还没有状态记录'
+                    : '还没有占卜记录'}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-5">
+            {months.map((month) => {
+              const monthOpen = searching || !collapsedMonths.has(month.key)
+              return (
+                <section key={month.key} className="flex flex-col gap-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleMonth(month.key)}
+                    className="flex w-fit items-center gap-2 rounded-lg px-1 py-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                    aria-expanded={monthOpen}
+                  >
+                    <ChevronDown
+                      className={cn('size-4 transition-transform', !monthOpen && '-rotate-90')}
+                    />
+                    <span className="font-serif-x text-base font-semibold text-foreground">
+                      {month.label}
+                    </span>
+                    <span className="text-xs">{month.items.length} 条</span>
+                  </button>
+                  {monthOpen && (
+                    <ul className="flex flex-col gap-3">
+                      {month.items.map((item) => {
+                        const key = `${item.kind}-${item.data.id}`
+                        const isOpen = expanded.has(key)
+                        return item.kind === 'status' ? (
+                          <StatusCard
+                            key={key}
+                            record={item.data}
+                            expanded={isOpen}
+                            onToggle={() => toggleExpanded(key)}
+                            onOpenImage={(i) => openViewer(item.data.images ?? [], i)}
+                            onEdit={() => setEditStatus(item.data)}
+                            onDelete={() => handleDelete('status', item.data.id)}
+                          />
+                        ) : (
+                          <DivinationCard
+                            key={key}
+                            record={item.data}
+                            expanded={isOpen}
+                            onToggle={() => toggleExpanded(key)}
+                            onOpenImage={(i) => openViewer(item.data.images ?? [], i)}
+                            onEdit={() => setEditDivination(item.data)}
+                            onDelete={() => handleDelete('divination', item.data.id)}
+                          />
+                        )
+                      })}
+                    </ul>
+                  )}
+                </section>
+              )
+            })}
+          </div>
+        )}
+      </div>
 
       <StatusForm
         open={!!editStatus}
