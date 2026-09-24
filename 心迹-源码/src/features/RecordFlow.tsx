@@ -444,14 +444,7 @@ function StatusCard({
       )}
 
       {record.freeText && (
-        <p
-          className={cn(
-            'mb-2 whitespace-pre-wrap text-sm text-foreground/90',
-            !expanded && 'line-clamp-2'
-          )}
-        >
-          {record.freeText}
-        </p>
+        <p className="mb-2 whitespace-pre-wrap text-xs text-foreground/80">{record.freeText}</p>
       )}
 
       {expanded && (
@@ -464,10 +457,12 @@ function StatusCard({
                 {factors.map((f) => (
                   <Chip key={f}>{f}</Chip>
                 ))}
-                {record.factorFree && (
-                  <span className="text-xs text-muted-foreground">· {record.factorFree}</span>
-                )}
               </div>
+              {record.factorFree && (
+                <p className="mt-1 whitespace-pre-wrap text-xs text-foreground/80">
+                  {record.factorFree}
+                </p>
+              )}
             </div>
           ) : null}
           {hasSensation && (
