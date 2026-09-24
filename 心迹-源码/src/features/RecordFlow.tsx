@@ -8,8 +8,6 @@ import {
   CalendarClock,
   History,
   ChevronDown,
-  Search,
-  X,
 } from 'lucide-react'
 import { useStore, deleteStatusRecord, deleteDivinationRecord } from '@/lib/storage'
 import { levelMeta, verifyMeta, formatDateTime } from '@/lib/format'
@@ -52,12 +50,12 @@ function matchesQuery(item: FlowItem, q: string): boolean {
 
 interface RecordFlowProps {
   entity: Entity
+  query: string
 }
 
-export function RecordFlow({ entity }: RecordFlowProps) {
+export function RecordFlow({ entity, query }: RecordFlowProps) {
   const { statusRecords, divinationRecords } = useStore()
   const [filter, setFilter] = useState<Filter>('all')
-  const [query, setQuery] = useState('')
   const [editStatus, setEditStatus] = useState<StatusRecord | null>(null)
   const [editDivination, setEditDivination] = useState<DivinationRecord | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
@@ -137,27 +135,6 @@ export function RecordFlow({ entity }: RecordFlowProps) {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      <div className="relative shrink-0">
-        <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="搜索标签或正文…"
-          className="h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        />
-        {query && (
-          <button
-            type="button"
-            onClick={() => setQuery('')}
-            className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            aria-label="清空搜索"
-            title="清空"
-          >
-            <X className="size-3.5" />
-          </button>
-        )}
-      </div>
-
       <div className="flex flex-wrap items-center gap-2 shrink-0">
         {filters.map((f) => (
           <button
@@ -444,7 +421,7 @@ function StatusCard({
       )}
 
       {record.freeText && (
-        <p className="mb-2 whitespace-pre-wrap text-sm text-foreground/80">{record.freeText}</p>
+        <p className="mb-2 whitespace-pre-wrap text-sm text-foreground/90">{record.freeText}</p>
       )}
 
       {expanded && (
@@ -459,7 +436,7 @@ function StatusCard({
                 ))}
               </div>
               {record.factorFree && (
-                <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/80">
+                <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/90">
                   {record.factorFree}
                 </p>
               )}
@@ -480,7 +457,7 @@ function StatusCard({
                 ))}
               </div>
               {record.sensationFree && (
-                <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/80">
+                <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/90">
                   {record.sensationFree}
                 </p>
               )}
