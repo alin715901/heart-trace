@@ -34,6 +34,7 @@ function matchesQuery(item: FlowItem, q: string): boolean {
           ...item.data.factorsCustom,
           item.data.freeText,
           item.data.factorFree,
+          item.data.sensationFree,
           item.data.level,
         ]
       : [
