@@ -392,7 +392,7 @@ export function Analysis({ entity }: { entity: Entity }) {
       </section>
 
       <PieSection
-        title="影响因素占比"
+        title="影响占比"
         icon={PieIcon}
         range={period.label}
         mode={pieMode}
