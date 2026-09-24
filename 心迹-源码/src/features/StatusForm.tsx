@@ -30,6 +30,14 @@ interface StatusFormProps {
   record?: StatusRecord | null
 }
 
+type StatusTab = 'time' | 'status' | 'influence'
+
+const STATUS_TABS: { key: StatusTab; label: string }[] = [
+  { key: 'time', label: '时间' },
+  { key: 'status', label: '状态' },
+  { key: 'influence', label: '影响' },
+]
+
 export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormProps) {
   const { settings } = useStore()
   const isEdit = !!record
@@ -42,6 +50,7 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
   const [recordedAt, setRecordedAt] = useState(toDatetimeLocal(new Date().toISOString()))
   const [isBackfill, setIsBackfill] = useState(false)
   const [images, setImages] = useState<string[]>([])
+  const [tab, setTab] = useState<StatusTab>('time')
 
   useEffect(() => {
     if (!open) return
@@ -96,117 +105,150 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label>状态核心等级</Label>
-            <div className="flex flex-wrap gap-2">
-              {LEVELS.map((lv) => (
-                <button
-                  type="button"
-                  key={lv}
-                  onClick={() => setLevel(lv)}
-                  className={cn(
-                    'rounded-full border px-4 py-1.5 text-sm transition-colors',
-                    level === lv ? 'border-transparent' : 'border-border hover:bg-accent/60'
-                  )}
-                  style={
-                    level === lv
-                      ? {
-                          color: `var(--theme-${levelMeta[lv].tone})`,
-                          background: `color-mix(in oklab, var(--theme-${levelMeta[lv].tone}) 16%, transparent)`,
-                          borderColor: `color-mix(in oklab, var(--theme-${levelMeta[lv].tone}) 40%, transparent)`,
-                        }
-                      : undefined
-                  }
-                >
-                  {lv}
-                </button>
-              ))}
-            </div>
+          <div className="flex gap-1 rounded-lg border border-border/60 bg-muted/40 p-1">
+            {STATUS_TABS.map((t) => (
+              <button
+                type="button"
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={cn(
+                  'flex-1 rounded-md px-3 py-1.5 text-sm transition-colors',
+                  tab === t.key
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>描述标签</Label>
-            <TagInput
-              options={settings.statusDescTags}
-              value={descTags}
-              onChange={setDescTags}
-              placeholder="补充描述，如：喜悦、焦虑…"
-              onAddOption={(t) =>
-                updateSettings({ statusDescTags: [...settings.statusDescTags, t] })
-              }
-              onRemoveOption={(t) =>
-                updateSettings({ statusDescTags: settings.statusDescTags.filter((x) => x !== t) })
-              }
-            />
-          </div>
-
-          {settings.fieldToggles.statusFreeText && (
-            <div className="flex flex-col gap-2">
-              <Label>自由补充</Label>
-              <Textarea
-                value={freeText}
-                onChange={(e) => setFreeText(e.target.value)}
-                placeholder="任何想记录的文字…"
-                rows={3}
-                className="resize-none"
-                style={{ fieldSizing: 'fixed' }}
-              />
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <Label>影响因素</Label>
-            <TagInput
-              options={settings.presetFactors}
-              value={factors}
-              onChange={setFactors}
-              placeholder="选择或自定义影响因素…"
-              onAddOption={(t) =>
-                updateSettings({ presetFactors: [...settings.presetFactors, t] })
-              }
-              onRemoveOption={(t) =>
-                updateSettings({ presetFactors: settings.presetFactors.filter((x) => x !== t) })
-              }
-            />
-          </div>
-
-          {settings.fieldToggles.statusFactorFree && (
-            <div className="flex flex-col gap-2">
-              <Label>影响因素 · 自由补充</Label>
-              <Textarea
-                value={factorFree}
-                onChange={(e) => setFactorFree(e.target.value)}
-                placeholder="不便用标签概括的影响因素…"
-                rows={3}
-                className="resize-none"
-                style={{ fieldSizing: 'fixed' }}
-              />
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <Label>图片（选填）</Label>
-            <ImageUploader value={images} onChange={setImages} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label>发生时间</Label>
-              <input
-                type="datetime-local"
-                value={recordedAt}
-                onChange={(e) => setRecordedAt(e.target.value)}
-                className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [color-scheme:dark]"
-              />
-            </div>
-            <div className="flex items-end justify-between gap-3 rounded-md border border-border/60 px-3 py-2">
-              <div className="flex flex-col">
-                <Label className="mb-0.5">这是补记</Label>
-                <span className="text-[11px] text-muted-foreground">非当下记录，回溯补填</span>
+          {tab === 'time' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label>图片（选填）</Label>
+                <ImageUploader value={images} onChange={setImages} />
               </div>
-              <Switch checked={isBackfill} onCheckedChange={setIsBackfill} />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <Label>发生时间</Label>
+                  <input
+                    type="datetime-local"
+                    value={recordedAt}
+                    onChange={(e) => setRecordedAt(e.target.value)}
+                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [color-scheme:dark]"
+                  />
+                </div>
+                <div className="flex items-end justify-between gap-3 rounded-md border border-border/60 px-3 py-2">
+                  <div className="flex flex-col">
+                    <Label className="mb-0.5">这是补记</Label>
+                    <span className="text-[11px] text-muted-foreground">非当下记录，回溯补填</span>
+                  </div>
+                  <Switch checked={isBackfill} onCheckedChange={setIsBackfill} />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {tab === 'status' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label>状态核心等级</Label>
+                <div className="flex flex-wrap gap-2">
+                  {LEVELS.map((lv) => (
+                    <button
+                      type="button"
+                      key={lv}
+                      onClick={() => setLevel(lv)}
+                      className={cn(
+                        'rounded-full border px-4 py-1.5 text-sm transition-colors',
+                        level === lv ? 'border-transparent' : 'border-border hover:bg-accent/60'
+                      )}
+                      style={
+                        level === lv
+                          ? {
+                              color: `var(--theme-${levelMeta[lv].tone})`,
+                              background: `color-mix(in oklab, var(--theme-${levelMeta[lv].tone}) 16%, transparent)`,
+                              borderColor: `color-mix(in oklab, var(--theme-${levelMeta[lv].tone}) 40%, transparent)`,
+                            }
+                          : undefined
+                      }
+                    >
+                      {lv}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>描述标签</Label>
+                <TagInput
+                  options={settings.statusDescTags}
+                  value={descTags}
+                  onChange={setDescTags}
+                  placeholder="补充描述，如：喜悦、焦虑…"
+                  onAddOption={(t) =>
+                    updateSettings({ statusDescTags: [...settings.statusDescTags, t] })
+                  }
+                  onRemoveOption={(t) =>
+                    updateSettings({
+                      statusDescTags: settings.statusDescTags.filter((x) => x !== t),
+                    })
+                  }
+                />
+              </div>
+
+              {settings.fieldToggles.statusFreeText && (
+                <div className="flex flex-col gap-2">
+                  <Label>自由补充</Label>
+                  <Textarea
+                    value={freeText}
+                    onChange={(e) => setFreeText(e.target.value)}
+                    placeholder="任何想记录的文字…"
+                    rows={3}
+                    className="resize-none"
+                    style={{ fieldSizing: 'fixed' }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'influence' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label>影响因素</Label>
+                <TagInput
+                  options={settings.presetFactors}
+                  value={factors}
+                  onChange={setFactors}
+                  placeholder="选择或自定义影响因素…"
+                  onAddOption={(t) =>
+                    updateSettings({ presetFactors: [...settings.presetFactors, t] })
+                  }
+                  onRemoveOption={(t) =>
+                    updateSettings({
+                      presetFactors: settings.presetFactors.filter((x) => x !== t),
+                    })
+                  }
+                />
+              </div>
+
+              {settings.fieldToggles.statusFactorFree && (
+                <div className="flex flex-col gap-2">
+                  <Label>自由补充</Label>
+                  <Textarea
+                    value={factorFree}
+                    onChange={(e) => setFactorFree(e.target.value)}
+                    placeholder="不便用标签概括的影响因素…"
+                    rows={3}
+                    className="resize-none"
+                    style={{ fieldSizing: 'fixed' }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <DialogFooter>
