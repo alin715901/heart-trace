@@ -8,6 +8,7 @@ import {
 } from '@/lib/storage'
 import { VERIFY_STATUSES, toDatetimeLocal, fromDatetimeLocal } from '@/lib/format'
 import type { DivinationRecord } from '@/lib/types'
+import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,14 @@ interface DivinationFormProps {
   record?: DivinationRecord | null
 }
 
+type DivinationTab = 'method' | 'cards' | 'verify'
+
+const DIVINATION_TABS: { key: DivinationTab; label: string }[] = [
+  { key: 'method', label: '方式' },
+  { key: 'cards', label: '牌面' },
+  { key: 'verify', label: '应验' },
+]
+
 export function DivinationForm({ open, onOpenChange, entityId, record }: DivinationFormProps) {
   const { settings } = useStore()
   const isEdit = !!record
@@ -50,6 +59,7 @@ export function DivinationForm({ open, onOpenChange, entityId, record }: Divinat
   const [verifyNote, setVerifyNote] = useState('')
   const [recordedAt, setRecordedAt] = useState(toDatetimeLocal(new Date().toISOString()))
   const [images, setImages] = useState<string[]>([])
+  const [tab, setTab] = useState<DivinationTab>('method')
 
   useEffect(() => {
     if (!open) return
@@ -114,134 +124,166 @@ export function DivinationForm({ open, onOpenChange, entityId, record }: Divinat
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label>占卜方式</Label>
-              <TagInput
-                options={settings.divinationMethods}
-                value={method ? [method] : []}
-                onChange={(next) => setMethod(next[0] ?? '')}
-                single
-                placeholder="自定义占卜方式，如：星盘 / 灵摆…"
-                onAddOption={(t) =>
-                  updateSettings({ divinationMethods: [...settings.divinationMethods, t] })
-                }
-                onRemoveOption={(t) =>
-                  updateSettings({
-                    divinationMethods: settings.divinationMethods.filter((x) => x !== t),
-                  })
-                }
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>时间</Label>
-              <input
-                type="datetime-local"
-                value={recordedAt}
-                onChange={(e) => setRecordedAt(e.target.value)}
-                className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [color-scheme:dark]"
-              />
-            </div>
+          <div className="flex gap-1 rounded-lg border border-border/60 bg-muted/40 p-1">
+            {DIVINATION_TABS.map((t) => (
+              <button
+                type="button"
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={cn(
+                  'flex-1 rounded-md px-3 py-1.5 text-sm transition-colors',
+                  tab === t.key
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>牌面（可多张）</Label>
-            <div className="flex flex-col gap-2">
-              {cards.map((c, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Input
-                    value={c}
-                    onChange={(e) => setCard(i, e.target.value)}
-                    placeholder={`第 ${i + 1} 张`}
-                  />
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => removeCard(i)}
-                    className="shrink-0 text-muted-foreground"
-                  >
-                    <X className="size-4" />
-                  </Button>
-                </div>
-              ))}
-              <Button type="button" size="sm" variant="secondary" onClick={addCard} className="w-fit">
-                <Plus className="size-4" />
-                添加牌面
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>牌面 / 过程图片（选填）</Label>
-            <ImageUploader value={images} onChange={setImages} />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>问题</Label>
-            <Textarea
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="你提出的问题…"
-              rows={3}
-              className="resize-none"
-              style={{ fieldSizing: 'fixed' }}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>结果</Label>
-            <Textarea
-              value={result}
-              onChange={(e) => setResult(e.target.value)}
-              placeholder="看到的指示、解读…"
-              rows={3}
-              className="resize-none"
-              style={{ fieldSizing: 'fixed' }}
-            />
-          </div>
-
-          {settings.fieldToggles.divinationThoughts && (
-            <div className="flex flex-col gap-2">
-              <Label>感想</Label>
-              <Textarea
-                value={thoughts}
-                onChange={(e) => setThoughts(e.target.value)}
-                placeholder="当下的感受与联想…"
-                rows={3}
-                className="resize-none"
-                style={{ fieldSizing: 'fixed' }}
-              />
+          {tab === 'method' && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label>占卜方式</Label>
+                <TagInput
+                  options={settings.divinationMethods}
+                  value={method ? [method] : []}
+                  onChange={(next) => setMethod(next[0] ?? '')}
+                  single
+                  placeholder="自定义占卜方式，如：星盘 / 灵摆…"
+                  onAddOption={(t) =>
+                    updateSettings({ divinationMethods: [...settings.divinationMethods, t] })
+                  }
+                  onRemoveOption={(t) =>
+                    updateSettings({
+                      divinationMethods: settings.divinationMethods.filter((x) => x !== t),
+                    })
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>时间</Label>
+                <input
+                  type="datetime-local"
+                  value={recordedAt}
+                  onChange={(e) => setRecordedAt(e.target.value)}
+                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [color-scheme:dark]"
+                />
+              </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label>应验状态（选填）</Label>
-              <Select value={verifyStatus} onValueChange={setVerifyStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="请选择" />
-                </SelectTrigger>
-                <SelectContent>
-                  {VERIFY_STATUSES.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {settings.fieldToggles.divinationVerifyNote && (
+          {tab === 'cards' && (
+            <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <Label>应验说明（选填）</Label>
-                <Input
-                  value={verifyNote}
-                  onChange={(e) => setVerifyNote(e.target.value)}
-                  placeholder="应验 / 未应验 的情况…"
+                <Label>牌面（可多张）</Label>
+                <div className="flex flex-col gap-2">
+                  {cards.map((c, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Input
+                        value={c}
+                        onChange={(e) => setCard(i, e.target.value)}
+                        placeholder={`第 ${i + 1} 张`}
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => removeCard(i)}
+                        className="shrink-0 text-muted-foreground"
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={addCard}
+                    className="w-fit"
+                  >
+                    <Plus className="size-4" />
+                    添加牌面
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>牌面 / 过程图片（选填）</Label>
+                <ImageUploader value={images} onChange={setImages} />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>问题</Label>
+                <Textarea
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="你提出的问题…"
+                  rows={3}
+                  className="resize-none"
+                  style={{ fieldSizing: 'fixed' }}
                 />
               </div>
-            )}
-          </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>结果</Label>
+                <Textarea
+                  value={result}
+                  onChange={(e) => setResult(e.target.value)}
+                  placeholder="看到的指示、解读…"
+                  rows={3}
+                  className="resize-none"
+                  style={{ fieldSizing: 'fixed' }}
+                />
+              </div>
+
+              {settings.fieldToggles.divinationThoughts && (
+                <div className="flex flex-col gap-2">
+                  <Label>感想</Label>
+                  <Textarea
+                    value={thoughts}
+                    onChange={(e) => setThoughts(e.target.value)}
+                    placeholder="当下的感受与联想…"
+                    rows={3}
+                    className="resize-none"
+                    style={{ fieldSizing: 'fixed' }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'verify' && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label>应验状态（选填）</Label>
+                <Select value={verifyStatus} onValueChange={setVerifyStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="请选择" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VERIFY_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {settings.fieldToggles.divinationVerifyNote && (
+                <div className="flex flex-col gap-2">
+                  <Label>说明（选填）</Label>
+                  <Input
+                    value={verifyNote}
+                    onChange={(e) => setVerifyNote(e.target.value)}
+                    placeholder="应验 / 未应验 的情况…"
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <DialogFooter>
