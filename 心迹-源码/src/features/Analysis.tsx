@@ -284,43 +284,45 @@ export function Analysis({ entity }: { entity: Entity }) {
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => setAnchor((a) => shiftAnchor(trendMode, a, -1))}
-                aria-label="上一个周期"
-                className="text-muted-foreground"
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
-              <span className="min-w-[7.5rem] text-center text-xs text-foreground">
-                {period.label}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => setAnchor((a) => shiftAnchor(trendMode, a, 1))}
-                aria-label="下一个周期"
-                className="text-muted-foreground"
-              >
-                <ChevronRight className="size-4" />
-              </Button>
-              {!isCurrentPeriod && (
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
-                  size="sm"
-                  onClick={() => setAnchor(new Date())}
-                  className="text-xs text-primary"
+                  size="icon-sm"
+                  onClick={() => setAnchor((a) => shiftAnchor(trendMode, a, -1))}
+                  aria-label="上一个周期"
+                  className="text-muted-foreground"
                 >
-                  回到今天
+                  <ChevronLeft className="size-4" />
                 </Button>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="size-3.5 text-primary" />
-              <Label className="text-xs text-muted-foreground">占卜标点</Label>
-              <Switch checked={showDivination} onCheckedChange={setShowDivination} />
+                <span className="min-w-[7.5rem] text-center text-xs text-foreground">
+                  {period.label}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setAnchor((a) => shiftAnchor(trendMode, a, 1))}
+                  aria-label="下一个周期"
+                  className="text-muted-foreground"
+                >
+                  <ChevronRight className="size-4" />
+                </Button>
+                {!isCurrentPeriod && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAnchor(new Date())}
+                    className="text-xs text-primary"
+                  >
+                    回到今天
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-3.5 text-primary" />
+                <Label className="text-xs text-muted-foreground">占卜标点</Label>
+                <Switch checked={showDivination} onCheckedChange={setShowDivination} />
+              </div>
             </div>
           </div>
         </div>
