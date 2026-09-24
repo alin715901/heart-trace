@@ -362,7 +362,7 @@ export function Analysis({ entity }: { entity: Entity }) {
                 dataKey="score"
                 stroke={tv['--primary']}
                 strokeWidth={2.5}
-                dot={{ r: 3, fill: tv['--primary'] }}
+                dot={false}
                 activeDot={{ r: 5 }}
                 connectNulls
               />
@@ -500,7 +500,11 @@ function PieSection({
         <Empty text={emptyText} />
       ) : (
         <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <ResponsiveContainer width="100%" height={260} className="sm:w-1/2">
+          <ResponsiveContainer
+            width="100%"
+            height={260}
+            className="sm:w-1/2 [&_.recharts-sector]:outline-hidden [&_.recharts-surface]:outline-hidden"
+          >
             <PieChart>
               <Pie
                 data={data}

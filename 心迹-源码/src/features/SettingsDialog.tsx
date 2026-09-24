@@ -35,7 +35,6 @@ import type { FieldToggles } from '@/lib/types'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -356,7 +355,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
       <DialogContent className="glass max-h-[90vh] overflow-y-auto border-border/40 sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>设置</DialogTitle>
-          <DialogDescription>管理外观主题、字段开关与数据</DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="appearance" className="w-full">
