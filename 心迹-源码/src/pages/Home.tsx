@@ -196,29 +196,29 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <Button
             variant="outline"
             onClick={() => setStatusOpen(true)}
-            className="flex-1 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs sm:flex-none sm:text-sm"
+            className="flex-1 min-w-0 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs has-[>svg]:!px-2 sm:flex-none sm:text-sm sm:has-[>svg]:px-3"
           >
-            <Activity className="size-4" />
+            <Activity className="size-3.5 sm:size-4" />
             记录状态
           </Button>
           <Button
             variant="outline"
             onClick={() => setDivOpen(true)}
-            className="flex-1 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs sm:flex-none sm:text-sm"
+            className="flex-1 min-w-0 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs has-[>svg]:!px-2 sm:flex-none sm:text-sm sm:has-[>svg]:px-3"
           >
-            <Sparkles className="size-4" />
+            <Sparkles className="size-3.5 sm:size-4" />
             记录占卜
           </Button>
           <Button
             variant="outline"
             onClick={() => setSenseOpen(true)}
-            className="flex-1 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs sm:flex-none sm:text-sm"
+            className="flex-1 min-w-0 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs has-[>svg]:!px-2 sm:flex-none sm:text-sm sm:has-[>svg]:px-3"
           >
-            <Waves className="size-4" />
+            <Waves className="size-3.5 sm:size-4" />
             感知此刻
           </Button>
           <Button
