@@ -164,6 +164,8 @@ export function Analysis({ entity }: { entity: Entity }) {
   const [showDivination, setShowDivination] = useState(true)
   const [pieMode, setPieMode] = useState<PieMode>('total')
   const [moodMode, setMoodMode] = useState<PieMode>('total')
+  const [sensationMode, setSensationMode] = useState<PieMode>('total')
+  const [perceptionMode, setPerceptionMode] = useState<PieMode>('total')
 
   const tv = useMemo(() => resolveThemeVars(settings), [settings])
   const chartColors = [
@@ -240,6 +242,20 @@ export function Analysis({ entity }: { entity: Entity }) {
   const moodPie = useMemo(
     () => aggregateTags(periodStatus, moodMode, (r) => r.descTags ?? []),
     [periodStatus, moodMode]
+  )
+
+  const sensationPie = useMemo(
+    () =>
+      aggregateTags(periodStatus, sensationMode, (r) => [
+        ...(r.sensationParts ?? []),
+        ...(r.sensationFeelings ?? []),
+      ]),
+    [periodStatus, sensationMode]
+  )
+
+  const perceptionPie = useMemo(
+    () => aggregateTags(periodStatus, perceptionMode, (r) => r.perceptions ?? []),
+    [periodStatus, perceptionMode]
   )
 
   return (
@@ -399,6 +415,32 @@ export function Analysis({ entity }: { entity: Entity }) {
         chartColors={chartColors}
         tooltipStyle={tooltipStyle}
         emptyText="该周期内暂无心情标签数据"
+      />
+
+      <PieSection
+        title="体感占比"
+        icon={PieIcon}
+        range={period.label}
+        mode={sensationMode}
+        onModeChange={setSensationMode}
+        data={sensationPie}
+        tv={tv}
+        chartColors={chartColors}
+        tooltipStyle={tooltipStyle}
+        emptyText="该周期内暂无体感数据"
+      />
+
+      <PieSection
+        title="灵觉占比"
+        icon={Sparkles}
+        range={period.label}
+        mode={perceptionMode}
+        onModeChange={setPerceptionMode}
+        data={perceptionPie}
+        tv={tv}
+        chartColors={chartColors}
+        tooltipStyle={tooltipStyle}
+        emptyText="该周期内暂无灵觉数据"
       />
     </div>
   )
