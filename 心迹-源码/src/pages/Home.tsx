@@ -196,11 +196,11 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             onClick={() => setStatusOpen(true)}
-            className="border-primary/40 text-primary hover:bg-primary/10"
+            className="flex-1 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs sm:flex-none sm:text-sm"
           >
             <Activity className="size-4" />
             记录状态
@@ -208,7 +208,7 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
           <Button
             variant="outline"
             onClick={() => setDivOpen(true)}
-            className="border-primary/40 text-primary hover:bg-primary/10"
+            className="flex-1 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs sm:flex-none sm:text-sm"
           >
             <Sparkles className="size-4" />
             记录占卜
@@ -216,7 +216,7 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
           <Button
             variant="outline"
             onClick={() => setSenseOpen(true)}
-            className="border-primary/40 text-primary hover:bg-primary/10"
+            className="flex-1 justify-center whitespace-nowrap border-primary/40 text-primary hover:bg-primary/10 text-xs sm:flex-none sm:text-sm"
           >
             <Waves className="size-4" />
             感知此刻
@@ -224,7 +224,7 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
           <Button
             variant="ghost"
             size="icon"
-            className="ml-auto text-muted-foreground"
+            className="ml-auto hidden shrink-0 text-muted-foreground sm:inline-flex"
             onClick={() => setTab('analysis')}
             title="查看分析"
           >
