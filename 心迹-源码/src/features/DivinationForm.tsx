@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -120,7 +119,6 @@ export function DivinationForm({ open, onOpenChange, entityId, record }: Divinat
       <DialogContent className="glass max-h-[90vh] overflow-y-auto border-border/40">
         <DialogHeader>
           <DialogTitle>{isEdit ? '编辑占卜记录' : '记录占卜'}</DialogTitle>
-          <DialogDescription>记录此次占卜的牌面、问题、结果与感想</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">

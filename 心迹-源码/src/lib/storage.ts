@@ -27,6 +27,24 @@ function load(): DataState {
     if (!raw) return blankState()
     const parsed = JSON.parse(raw)
     const base = blankState()
+    const parsedSettings = parsed.settings || {}
+    const settings: Settings = {
+      ...base.settings,
+      ...parsedSettings,
+      fieldToggles: { ...base.settings.fieldToggles, ...(parsedSettings.fieldToggles || {}) },
+      savedThemes: Array.isArray(parsedSettings.savedThemes)
+        ? (parsedSettings as any).savedThemes
+        : base.settings.savedThemes,
+    }
+    // 预设标签迁移：删除“痒”，将“灵觉”重命名为“灵知”
+    if (Array.isArray(settings.sensationFeelingOptions)) {
+      settings.sensationFeelingOptions = settings.sensationFeelingOptions.filter((t) => t !== '痒')
+    }
+    if (Array.isArray(settings.perceptionOptions)) {
+      settings.perceptionOptions = settings.perceptionOptions.map((t) =>
+        t === '灵觉' ? '灵知' : t
+      )
+    }
     return {
       entities: Array.isArray(parsed.entities) ? parsed.entities : [],
       statusRecords: (Array.isArray(parsed.statusRecords) ? parsed.statusRecords : []).map(
@@ -35,14 +53,7 @@ function load(): DataState {
       divinationRecords: (Array.isArray(parsed.divinationRecords) ? parsed.divinationRecords : []).map(
         (r: any) => ({ ...r, images: Array.isArray(r.images) ? r.images : [] })
       ),
-      settings: {
-        ...base.settings,
-        ...(parsed.settings || {}),
-        fieldToggles: { ...base.settings.fieldToggles, ...((parsed.settings || {}).fieldToggles || {}) },
-        savedThemes: Array.isArray((parsed.settings || {}).savedThemes)
-          ? (parsed.settings as any).savedThemes
-          : base.settings.savedThemes,
-      },
+      settings,
       activeEntityId: parsed.activeEntityId ?? null,
     }
   } catch {

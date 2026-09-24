@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -118,7 +117,6 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
       <DialogContent className="glass max-h-[90vh] overflow-y-auto border-border/40">
         <DialogHeader>
           <DialogTitle>{isEdit ? '编辑状态记录' : '记录状态'}</DialogTitle>
-          <DialogDescription>记录此刻与这个主体的链接</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
