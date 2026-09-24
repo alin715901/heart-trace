@@ -220,7 +220,7 @@ export function DivinationForm({ open, onOpenChange, entityId, record }: Divinat
               <Label>应验状态（选填）</Label>
               <Select value={verifyStatus} onValueChange={setVerifyStatus}>
                 <SelectTrigger>
-                  <SelectValue placeholder="暂不设置" />
+                  <SelectValue placeholder="请选择" />
                 </SelectTrigger>
                 <SelectContent>
                   {VERIFY_STATUSES.map((s) => (

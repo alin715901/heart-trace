@@ -13,7 +13,7 @@ export const levelMeta: Record<
   断连: { score: 0, tone: 'red', color: 'var(--theme-red)' },
 }
 
-export const VERIFY_STATUSES = ['待验证', '已应验', '未应验', '部分应验', '说不清']
+export const VERIFY_STATUSES = ['暂不设置', '待验证', '已应验', '未应验', '部分应验', '说不清']
 
 export const verifyMeta: Record<
   string,
