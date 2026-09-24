@@ -131,7 +131,7 @@ export function DivinationForm({ open, onOpenChange, entityId, record }: Divinat
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={cn(
-                  'flex-1 rounded-md px-3 py-1.5 text-sm transition-colors',
+                  'flex-1 min-w-0 whitespace-nowrap rounded-md px-2 py-1.5 text-xs transition-colors sm:px-3 sm:text-sm',
                   tab === t.key
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
