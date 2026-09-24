@@ -405,8 +405,18 @@ function StatusCard({
 }) {
   const meta = levelMeta[record.level]
   const factors = [...record.factorsPreset, ...record.factorsCustom]
+  const hasSensation =
+    (record.sensationParts?.length ?? 0) > 0 ||
+    (record.sensationFeelings?.length ?? 0) > 0 ||
+    (record.perceptions?.length ?? 0) > 0 ||
+    (record.sensationFree ?? '') !== ''
   const hasMore = Boolean(
-    record.freeText || record.factorFree || factors.length > 0 || (record.images?.length ?? 0) > 0
+    record.freeText ||
+      record.factorFree ||
+      (record.sensationFree ?? '') ||
+      factors.length > 0 ||
+      hasSensation ||
+      (record.images?.length ?? 0) > 0
   )
   return (
     <CardShell
@@ -460,6 +470,27 @@ function StatusCard({
               </div>
             </div>
           ) : null}
+          {hasSensation && (
+            <div className="border-t border-border/30 pt-2">
+              <p className="mb-1 text-[11px] text-muted-foreground">体感灵觉</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(record.sensationParts ?? []).map((t) => (
+                  <Chip key={`sp-${t}`}>{t}</Chip>
+                ))}
+                {(record.sensationFeelings ?? []).map((t) => (
+                  <Chip key={`sf-${t}`}>{t}</Chip>
+                ))}
+                {(record.perceptions ?? []).map((t) => (
+                  <Chip key={`p-${t}`}>{t}</Chip>
+                ))}
+              </div>
+              {record.sensationFree && (
+                <p className="mt-1 whitespace-pre-wrap text-xs text-foreground/80">
+                  {record.sensationFree}
+                </p>
+              )}
+            </div>
+          )}
         </>
       )}
 

@@ -21,6 +21,10 @@ export interface StatusRecord {
   factorsPreset: string[] // 预设影响因素
   factorsCustom: string[] // 自定义影响因素
   factorFree: string // 影响因素自由补充
+  sensationParts: string[] // 体感部位
+  sensationFeelings: string[] // 体感感受
+  perceptions: string[] // 灵觉
+  sensationFree: string // 体感灵觉 · 自由补充
   recordedAt: string // 状态发生时间（可补记）
   isBackfill: boolean // 是否补记
   images: string[] // 图片（data URL，仅本地保存）
@@ -67,6 +71,9 @@ export interface Settings {
   statusDescTags: string[]
   presetFactors: string[]
   divinationMethods: string[]
+  sensationPartOptions: string[] // 体感部位标签池
+  sensationFeelingOptions: string[] // 体感感受标签池
+  perceptionOptions: string[] // 灵觉标签池
   categories: string[]
   fieldToggles: FieldToggles
   themeId: string // 当前主题：预设 id / 'custom' / 'saved:<id>'
