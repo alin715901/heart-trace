@@ -410,6 +410,10 @@ function StatusCard({
     (record.sensationFeelings?.length ?? 0) > 0 ||
     (record.perceptions?.length ?? 0) > 0 ||
     (record.sensationFree ?? '') !== ''
+  const hasSensationTags =
+    (record.sensationParts?.length ?? 0) > 0 ||
+    (record.sensationFeelings?.length ?? 0) > 0 ||
+    (record.perceptions?.length ?? 0) > 0
   const hasMore = Boolean(
     record.freeText ||
       record.factorFree ||
@@ -444,13 +448,27 @@ function StatusCard({
       )}
 
       {record.freeText && (
-        <p className="mb-2 whitespace-pre-wrap text-xs text-foreground/80">{record.freeText}</p>
+        <p className={cn('mb-2 whitespace-pre-wrap text-base md:text-sm text-foreground/80', !expanded && 'line-clamp-1')}>
+          {record.freeText}
+        </p>
+      )}
+
+      {record.factorFree && (
+        <p className={cn('mb-2 whitespace-pre-wrap text-base md:text-sm text-foreground/80', !expanded && 'line-clamp-1')}>
+          {record.factorFree}
+        </p>
+      )}
+
+      {record.sensationFree && (
+        <p className={cn('mb-2 whitespace-pre-wrap text-base md:text-sm text-foreground/80', !expanded && 'line-clamp-1')}>
+          {record.sensationFree}
+        </p>
       )}
 
       {expanded && (
         <>
           <ImageGrid images={record.images} onOpen={onOpenImage} />
-          {factors.length > 0 || record.factorFree ? (
+          {factors.length > 0 && (
             <div className="border-t border-border/30 pt-2">
               <p className="mb-1 text-[11px] text-muted-foreground">影响因素</p>
               <div className="flex flex-wrap gap-1.5">
@@ -458,14 +476,9 @@ function StatusCard({
                   <Chip key={f}>{f}</Chip>
                 ))}
               </div>
-              {record.factorFree && (
-                <p className="mt-1 whitespace-pre-wrap text-xs text-foreground/80">
-                  {record.factorFree}
-                </p>
-              )}
             </div>
-          ) : null}
-          {hasSensation && (
+          )}
+          {hasSensationTags && (
             <div className="border-t border-border/30 pt-2">
               <p className="mb-1 text-[11px] text-muted-foreground">体感灵觉</p>
               <div className="flex flex-wrap gap-1.5">
@@ -479,11 +492,6 @@ function StatusCard({
                   <Chip key={`p-${t}`}>{t}</Chip>
                 ))}
               </div>
-              {record.sensationFree && (
-                <p className="mt-1 whitespace-pre-wrap text-xs text-foreground/80">
-                  {record.sensationFree}
-                </p>
-              )}
             </div>
           )}
         </>
