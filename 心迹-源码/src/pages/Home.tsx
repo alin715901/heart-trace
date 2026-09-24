@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Pencil, Trash2, Activity, Sparkles, Wand2, PanelLeftOpen, Waves } from 'lucide-react'
+import { Plus, Pencil, Trash2, Activity, Sparkles, Wand2, PanelLeftOpen, Waves, Search, X } from 'lucide-react'
 import { useStore, setActiveEntity, deleteEntity } from '@/lib/storage'
 import { applyTheme, applyBackground } from '@/lib/theme'
 import type { Entity } from '@/lib/types'
@@ -141,6 +141,7 @@ function Welcome({ onCreate, hasEntities }: { onCreate: () => void; hasEntities:
 
 function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) {
   const [tab, setTab] = useState('flow')
+  const [query, setQuery] = useState('')
   const [statusOpen, setStatusOpen] = useState(false)
   const [divOpen, setDivOpen] = useState(false)
   const [senseOpen, setSenseOpen] = useState(false)
@@ -235,19 +236,43 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
 
       {/* 内容区 */}
       <Tabs value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col gap-4">
-        <TabsList
-          className="self-start shrink-0"
-          style={{
-            background:
-              'color-mix(in oklab, var(--card) var(--glass-alpha, 78%), transparent)',
-            backdropFilter: 'blur(calc(var(--glass-alpha-num, 0.78) * 14px))',
-          }}
-        >
-          <TabsTrigger value="flow">记录流</TabsTrigger>
-          <TabsTrigger value="analysis">分析</TabsTrigger>
-        </TabsList>
+        <div className="flex shrink-0 items-center gap-2">
+          <TabsList
+            className="shrink-0"
+            style={{
+              background:
+                'color-mix(in oklab, var(--card) var(--glass-alpha, 78%), transparent)',
+              backdropFilter: 'blur(calc(var(--glass-alpha-num, 0.78) * 14px))',
+            }}
+          >
+            <TabsTrigger value="flow">记录流</TabsTrigger>
+            <TabsTrigger value="analysis">分析</TabsTrigger>
+          </TabsList>
+          {tab === 'flow' && (
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="搜索标签或正文…"
+                className="h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  aria-label="清空搜索"
+                  title="清空"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         <TabsContent value="flow" className="mt-0 flex min-h-0 flex-col">
-          <RecordFlow entity={entity} />
+          <RecordFlow entity={entity} query={query} />
         </TabsContent>
         <TabsContent value="analysis" className="mt-0 min-h-0 overflow-y-auto">
           <Analysis entity={entity} />
