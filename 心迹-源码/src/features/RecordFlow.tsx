@@ -423,7 +423,7 @@ function StatusCard({
       {record.freeText && (
         <p
           className={cn(
-            'mb-2 whitespace-pre-wrap text-sm text-foreground/90',
+            'mb-2 whitespace-pre-wrap break-words text-sm text-foreground/90',
             !expanded && 'line-clamp-1'
           )}
         >
@@ -431,59 +431,46 @@ function StatusCard({
         </p>
       )}
 
-      {expanded && <ImageGrid images={record.images} onOpen={onOpenImage} />}
-
-      {(factors.length > 0 || record.factorFree) && (
-        <div className={cn('pt-2', expanded ? 'border-t border-border/30' : 'pt-0')}>
-          {expanded && <p className="mb-1 text-[11px] text-muted-foreground">影响因素</p>}
-          {expanded &&
-            factors.length > 0 && (
+      {expanded && (
+        <>
+          <ImageGrid images={record.images} onOpen={onOpenImage} />
+          {factors.length > 0 || record.factorFree ? (
+            <div className="border-t border-border/30 pt-2">
+              <p className="mb-1 text-[11px] text-muted-foreground">影响因素</p>
               <div className="flex flex-wrap gap-1.5">
                 {factors.map((f) => (
                   <Chip key={f}>{f}</Chip>
                 ))}
               </div>
-            )}
-          {record.factorFree && (
-            <p
-              className={cn(
-                'mt-1 whitespace-pre-wrap text-sm text-foreground/90',
-                !expanded && 'line-clamp-1'
+              {record.factorFree && (
+                <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground/90">
+                  {record.factorFree}
+                </p>
               )}
-            >
-              {record.factorFree}
-            </p>
-          )}
-        </div>
-      )}
-
-      {hasSensation && (
-        <div className={cn('pt-2', expanded ? 'border-t border-border/30' : 'pt-0')}>
-          {expanded && <p className="mb-1 text-[11px] text-muted-foreground">体感灵觉</p>}
-          {expanded && (
-            <div className="flex flex-wrap gap-1.5">
-              {(record.sensationParts ?? []).map((t) => (
-                <Chip key={`sp-${t}`}>{t}</Chip>
-              ))}
-              {(record.sensationFeelings ?? []).map((t) => (
-                <Chip key={`sf-${t}`}>{t}</Chip>
-              ))}
-              {(record.perceptions ?? []).map((t) => (
-                <Chip key={`p-${t}`}>{t}</Chip>
-              ))}
+            </div>
+          ) : null}
+          {hasSensation && (
+            <div className="border-t border-border/30 pt-2">
+              <p className="mb-1 text-[11px] text-muted-foreground">体感灵觉</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(record.sensationParts ?? []).map((t) => (
+                  <Chip key={`sp-${t}`}>{t}</Chip>
+                ))}
+                {(record.sensationFeelings ?? []).map((t) => (
+                  <Chip key={`sf-${t}`}>{t}</Chip>
+                ))}
+                {(record.perceptions ?? []).map((t) => (
+                  <Chip key={`p-${t}`}>{t}</Chip>
+                ))}
+              </div>
+              {record.sensationFree && (
+                <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground/90">
+                  {record.sensationFree}
+                </p>
+              )}
             </div>
           )}
-          {record.sensationFree && (
-            <p
-              className={cn(
-                'mt-1 whitespace-pre-wrap text-sm text-foreground/90',
-                !expanded && 'line-clamp-1'
-              )}
-            >
-              {record.sensationFree}
-            </p>
-          )}
-        </div>
+        </>
       )}
 
       {hasMore && <ExpandButton expanded={expanded} onToggle={onToggle} />}
@@ -544,47 +531,39 @@ function DivinationCard({
         <p className="mb-1.5 flex gap-1.5 text-sm text-foreground/90">
           <Quote className="size-3.5 shrink-0 translate-y-0.5 text-primary/70" />
           <span
-            className={cn('min-w-0 flex-1 whitespace-pre-wrap', !expanded && 'line-clamp-1')}
+            className={cn(
+              'min-w-0 flex-1 whitespace-pre-wrap break-words',
+              !expanded && 'line-clamp-1'
+            )}
           >
             {record.question}
           </span>
         </p>
       )}
 
-      {record.result && (
-        <p
-          className={cn(
-            'mb-1.5 whitespace-pre-wrap text-sm text-foreground/80',
-            !expanded && 'line-clamp-1'
-          )}
-        >
-          {record.result}
-        </p>
-      )}
+      {expanded && (
+        <>
+          <ImageGrid images={record.images} onOpen={onOpenImage} />
 
-      {record.thoughts && (
-        <p
-          className={cn(
-            'mb-1.5 whitespace-pre-wrap text-sm text-muted-foreground',
-            !expanded && 'line-clamp-1'
+          {record.result && (
+            <p className="mb-1.5 whitespace-pre-wrap break-words text-sm text-foreground/80">
+              {record.result}
+            </p>
           )}
-        >
-          {record.thoughts}
-        </p>
-      )}
 
-      {record.verifyNote && (
-        <p
-          className={cn(
-            'border-t border-border/30 pt-2 text-xs text-muted-foreground',
-            !expanded && 'line-clamp-1'
+          {record.thoughts && (
+            <p className="mb-1.5 whitespace-pre-wrap break-words text-sm text-muted-foreground">
+              {record.thoughts}
+            </p>
           )}
-        >
-          应验说明：{record.verifyNote}
-        </p>
-      )}
 
-      {expanded && <ImageGrid images={record.images} onOpen={onOpenImage} />}
+          {record.verifyNote && (
+            <div className="border-t border-border/30 pt-2 text-xs text-muted-foreground">
+              应验说明：{record.verifyNote}
+            </div>
+          )}
+        </>
+      )}
 
       {hasMore && <ExpandButton expanded={expanded} onToggle={onToggle} />}
     </CardShell>
