@@ -444,7 +444,7 @@ function StatusCard({
       )}
 
       {record.freeText && (
-        <p className="mb-2 whitespace-pre-wrap text-base md:text-sm text-foreground/80">{record.freeText}</p>
+        <p className="mb-2 whitespace-pre-wrap text-sm text-foreground/80">{record.freeText}</p>
       )}
 
       {expanded && (
@@ -459,7 +459,7 @@ function StatusCard({
                 ))}
               </div>
               {record.factorFree && (
-                <p className="mt-1 whitespace-pre-wrap text-base md:text-sm text-foreground/80">
+                <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/80">
                   {record.factorFree}
                 </p>
               )}
@@ -480,7 +480,7 @@ function StatusCard({
                 ))}
               </div>
               {record.sensationFree && (
-                <p className="mt-1 whitespace-pre-wrap text-base md:text-sm text-foreground/80">
+                <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/80">
                   {record.sensationFree}
                 </p>
               )}
