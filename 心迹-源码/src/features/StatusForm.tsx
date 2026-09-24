@@ -30,12 +30,13 @@ interface StatusFormProps {
   record?: StatusRecord | null
 }
 
-type StatusTab = 'time' | 'status' | 'influence'
+type StatusTab = 'time' | 'status' | 'influence' | 'body'
 
 const STATUS_TABS: { key: StatusTab; label: string }[] = [
   { key: 'time', label: '时间' },
   { key: 'status', label: '状态' },
   { key: 'influence', label: '影响' },
+  { key: 'body', label: '体感灵觉' },
 ]
 
 export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormProps) {
@@ -47,6 +48,10 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
   const [freeText, setFreeText] = useState('')
   const [factors, setFactors] = useState<string[]>([])
   const [factorFree, setFactorFree] = useState('')
+  const [sensationParts, setSensationParts] = useState<string[]>([])
+  const [sensationFeelings, setSensationFeelings] = useState<string[]>([])
+  const [perceptions, setPerceptions] = useState<string[]>([])
+  const [sensationFree, setSensationFree] = useState('')
   const [recordedAt, setRecordedAt] = useState(toDatetimeLocal(new Date().toISOString()))
   const [isBackfill, setIsBackfill] = useState(false)
   const [images, setImages] = useState<string[]>([])
@@ -60,6 +65,10 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
       setFreeText(record.freeText)
       setFactors([...record.factorsPreset, ...record.factorsCustom])
       setFactorFree(record.factorFree)
+      setSensationParts(record.sensationParts ?? [])
+      setSensationFeelings(record.sensationFeelings ?? [])
+      setPerceptions(record.perceptions ?? [])
+      setSensationFree(record.sensationFree ?? '')
       setRecordedAt(toDatetimeLocal(record.recordedAt))
       setIsBackfill(record.isBackfill)
       setImages(record.images ?? [])
@@ -69,6 +78,10 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
       setFreeText('')
       setFactors([])
       setFactorFree('')
+      setSensationParts([])
+      setSensationFeelings([])
+      setPerceptions([])
+      setSensationFree('')
       setRecordedAt(toDatetimeLocal(new Date().toISOString()))
       setIsBackfill(false)
       setImages([])
@@ -87,6 +100,10 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
       factorsPreset,
       factorsCustom,
       factorFree: settings.fieldToggles.statusFactorFree ? factorFree : '',
+      sensationParts: sensationParts.filter(Boolean),
+      sensationFeelings: sensationFeelings.filter(Boolean),
+      perceptions: perceptions.filter(Boolean),
+      sensationFree,
       recordedAt: fromDatetimeLocal(recordedAt),
       isBackfill,
       images,
@@ -250,6 +267,83 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
             </div>
           )}
         </div>
+
+          {tab === 'body' && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label>体感 · 部位</Label>
+                  <TagInput
+                    options={settings.sensationPartOptions}
+                    value={sensationParts}
+                    onChange={setSensationParts}
+                    placeholder="如：手部、胸口…"
+                    onAddOption={(t) =>
+                      updateSettings({
+                        sensationPartOptions: [...settings.sensationPartOptions, t],
+                      })
+                    }
+                    onRemoveOption={(t) =>
+                      updateSettings({
+                        sensationPartOptions: settings.sensationPartOptions.filter((x) => x !== t),
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label>体感 · 感受</Label>
+                  <TagInput
+                    options={settings.sensationFeelingOptions}
+                    value={sensationFeelings}
+                    onChange={setSensationFeelings}
+                    placeholder="如：温暖、发紧…"
+                    onAddOption={(t) =>
+                      updateSettings({
+                        sensationFeelingOptions: [...settings.sensationFeelingOptions, t],
+                      })
+                    }
+                    onRemoveOption={(t) =>
+                      updateSettings({
+                        sensationFeelingOptions: settings.sensationFeelingOptions.filter(
+                          (x) => x !== t
+                        ),
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>灵觉</Label>
+                <TagInput
+                  options={settings.perceptionOptions}
+                  value={perceptions}
+                  onChange={setPerceptions}
+                  placeholder="如：灵视、灵听…"
+                  onAddOption={(t) =>
+                    updateSettings({ perceptionOptions: [...settings.perceptionOptions, t] })
+                  }
+                  onRemoveOption={(t) =>
+                    updateSettings({
+                      perceptionOptions: settings.perceptionOptions.filter((x) => x !== t),
+                    })
+                  }
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label>自由补充</Label>
+                <Textarea
+                  value={sensationFree}
+                  onChange={(e) => setSensationFree(e.target.value)}
+                  placeholder="记录体验和感想…"
+                  rows={3}
+                  className="resize-none"
+                  style={{ fieldSizing: 'fixed' }}
+                />
+              </div>
+            </div>
+          )}
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
