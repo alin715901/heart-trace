@@ -254,7 +254,7 @@ function ThemePanel() {
                   type="color"
                   value={custom[row.key]}
                   onChange={(e) => updateCustom(row.key, e.target.value)}
-                  className="h-8 w-12 cursor-pointer rounded border border-border/50 bg-transparent"
+                  className="h-8 w-12 cursor-pointer rounded border border-border/60"
                 />
               </div>
             </div>

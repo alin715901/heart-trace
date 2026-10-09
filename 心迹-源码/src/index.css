@@ -339,3 +339,27 @@
 @media (prefers-reduced-motion: reduce) {
   .page-transition { transition: none !important; }
 }
+
+/* ================================================================
+   类型为 color 的输入框：让色板铺满整个按钮、避免贴近底色时看起来"空"
+   ================================================================ */
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border: none;
+  border-radius: inherit;
+}
+input[type="color"]::-webkit-color-swatch {
+  border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
+  border-radius: calc(var(--radius) - 6px);
+}
+input[type="color"]::-moz-color-swatch {
+  border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
+  border-radius: calc(var(--radius) - 6px);
+}
