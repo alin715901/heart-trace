@@ -4,6 +4,7 @@ import { useStore, setActiveEntity, deleteEntity } from '@/lib/storage'
 import { applyTheme, applyBackground } from '@/lib/theme'
 import type { Entity } from '@/lib/types'
 import { Sidebar } from '@/components/Sidebar'
+import { confirmDialog } from '@/components/Confirm'
 import { EntityDialog } from '@/components/EntityDialog'
 import { SettingsDialog } from '@/features/SettingsDialog'
 import { StatusForm } from '@/features/StatusForm'
@@ -146,8 +147,11 @@ function EntityView({ entity, onEdit }: { entity: Entity; onEdit: () => void }) 
   const [divOpen, setDivOpen] = useState(false)
   const [senseOpen, setSenseOpen] = useState(false)
 
-  function handleDelete() {
-    if (!window.confirm(`确定删除主体「${entity.name}」及其全部记录吗？此操作不可撤销。`)) return
+  async function handleDelete() {
+    const ok = await confirmDialog(
+      `确定删除主体「${entity.name}」及其全部记录吗？此操作不可撤销。`
+    )
+    if (!ok) return
     deleteEntity(entity.id)
   }
 

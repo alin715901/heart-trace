@@ -15,6 +15,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { confirmDialog } from '@/components/Confirm'
 import { useStore, setActiveEntity, renameEntityTag, deleteEntityTag, deleteEntity } from '@/lib/storage'
 import type { Entity } from '@/lib/types'
 import { Button } from '@/components/ui/button'
@@ -70,18 +71,19 @@ export function Sidebar({
     setRenameDraft('')
   }
 
-  function handleDeleteFolder(label: string, count: number) {
-    if (
-      !window.confirm(
-        `确定删除文件夹「${label}」吗？\n将从 ${count} 个主体上移除该标签，主体与其记录都会保留。`
-      )
+  async function handleDeleteFolder(label: string, count: number) {
+    const ok = await confirmDialog(
+      `确定删除文件夹「${label}」吗？\n将从 ${count} 个主体上移除该标签，主体与其记录都会保留。`
     )
-      return
+    if (!ok) return
     deleteEntityTag(label)
   }
 
-  function handleDeleteEntity(entity: Entity) {
-    if (!window.confirm(`确定删除主体「${entity.name}」及其全部记录吗？此操作不可撤销。`)) return
+  async function handleDeleteEntity(entity: Entity) {
+    const ok = await confirmDialog(
+      `确定删除主体「${entity.name}」及其全部记录吗？此操作不可撤销。`
+    )
+    if (!ok) return
     deleteEntity(entity.id)
   }
 

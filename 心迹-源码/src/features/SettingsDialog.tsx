@@ -30,6 +30,7 @@ import {
   DEFAULT_CUSTOM_THEME,
 } from '@/lib/theme'
 import { fileToStoredImage } from '@/lib/image'
+import { confirmDialog } from '@/components/Confirm'
 import { cn } from '@/lib/utils'
 import type { FieldToggles } from '@/lib/types'
 import {
@@ -149,10 +150,11 @@ function ThemePanel() {
     toast.success(`已存为预设「${name}」`)
   }
 
-  function deletePreset(id: string) {
+  async function deletePreset(id: string) {
     const target = savedThemes.find((t) => t.id === id)
     if (!target) return
-    if (!window.confirm(`确定删除预设「${target.label}」吗？`)) return
+    const ok = await confirmDialog(`确定删除预设「${target.label}」吗？`)
+    if (!ok) return
     const next = savedThemes.filter((t) => t.id !== id)
     updateSettings({
       savedThemes: next,
@@ -395,8 +397,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     }
   }
 
-  function handleReset() {
-    if (!window.confirm('确定清空全部数据吗？此操作不可撤销，建议先导出备份。')) return
+  async function handleReset() {
+    const ok = await confirmDialog(
+      '确定清空全部数据吗？此操作不可撤销，建议先导出备份。'
+    )
+    if (!ok) return
     resetAll()
     toast.success('已清空全部数据')
     onOpenChange(false)

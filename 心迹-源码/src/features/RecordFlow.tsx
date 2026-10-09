@@ -15,6 +15,7 @@ import type { DivinationRecord, Entity, StatusRecord } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ImageViewer, type ViewerImage } from '@/components/ImageViewer'
+import { confirmDialog } from '@/components/Confirm'
 import { StatusForm } from './StatusForm'
 import { DivinationForm } from './DivinationForm'
 
@@ -124,9 +125,10 @@ export function RecordFlow({ entity, query }: RecordFlowProps) {
 
   const allCollapsed = months.length > 0 && months.every((m) => collapsedMonths.has(m.key))
 
-  function handleDelete(kind: 'status' | 'divination', id: string) {
+  async function handleDelete(kind: 'status' | 'divination', id: string) {
     const label = kind === 'status' ? '状态记录' : '占卜记录'
-    if (!window.confirm(`确定删除这条${label}吗？此操作不可撤销。`)) return
+    const ok = await confirmDialog(`确定删除这条${label}吗？此操作不可撤销。`)
+    if (!ok) return
     if (kind === 'status') deleteStatusRecord(id)
     else deleteDivinationRecord(id)
   }

@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { ConfirmHost } from '@/components/Confirm'
 import Home from './pages/Home'
 
 /**
@@ -26,6 +27,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <ConfirmHost />
         <Home />
       </TooltipProvider>
     </QueryClientProvider>
