@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { useStore } from '@/lib/storage'
 import { resolveThemeVars } from '@/lib/theme'
-import { levelMeta } from '@/lib/format'
+import { levelMeta, scoreToLabel } from '@/lib/format'
 import type { Entity, StatusRecord } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Switch } from '@/components/ui/switch'
@@ -354,7 +354,9 @@ export function Analysis({ entity }: { entity: Entity }) {
               <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(value: number, name) => [
-                  name === 'score' ? ['强', '中', '弱', '断连'][value] ?? value : value,
+                  name === 'score'
+                    ? `${scoreToLabel(value)}${value != null ? ` · ${value}` : ''}`
+                    : value,
                   name === 'score' ? '均值等级' : '占卜',
                 ]}
                 labelFormatter={(l) => `周期：${l}`}
@@ -525,8 +527,9 @@ function PieSection({
               </Pie>
               <Tooltip
                 contentStyle={tooltipStyle}
-                formatter={(value: number) => [
-                  `${value} 次 · ${Math.round((value / total) * 100)}%`,
+                labelFormatter={() => ''}
+                formatter={(value: number, name) => [
+                  `${name} · ${value} 次 · ${Math.round((value / total) * 100)}%`,
                   '出现占比',
                 ]}
               />

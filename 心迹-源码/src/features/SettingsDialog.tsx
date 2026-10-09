@@ -352,7 +352,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass max-h-[90vh] overflow-y-auto border-border/40 sm:max-w-2xl">
+      <DialogContent className="glass h-[min(85vh,680px)] max-w-[calc(100%-1.5rem)] overflow-y-auto border-border/40 p-5 sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>设置</DialogTitle>
         </DialogHeader>

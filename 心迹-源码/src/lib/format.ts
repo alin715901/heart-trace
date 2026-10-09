@@ -26,6 +26,30 @@ export const verifyMeta: Record<
   说不清: { tone: 'neutral' },
 }
 
+// 把 0–3 的均值映射为含中间过渡的等级标签
+export function scoreToLabel(score: number | null | undefined): string {
+  if (score == null || isNaN(score)) return '—'
+  const points: { v: number; label: string }[] = [
+    { v: 0, label: '断连' },
+    { v: 0.5, label: '微弱' },
+    { v: 1, label: '弱' },
+    { v: 1.5, label: '较弱' },
+    { v: 2, label: '中' },
+    { v: 2.5, label: '较强' },
+    { v: 3, label: '强' },
+  ]
+  let best = points[0]
+  let bestDist = Math.abs(score - best.v)
+  for (const p of points) {
+    const d = Math.abs(score - p.v)
+    if (d < bestDist) {
+      best = p
+      bestDist = d
+    }
+  }
+  return best.label
+}
+
 export function formatDateTime(iso: string): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso

@@ -116,7 +116,7 @@ export function DivinationForm({ open, onOpenChange, entityId, record }: Divinat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass max-h-[90vh] overflow-y-auto border-border/40">
+      <DialogContent className="glass h-[min(85vh,680px)] max-w-[calc(100%-1.5rem)] overflow-y-auto border-border/40 p-5 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEdit ? '编辑占卜记录' : '记录占卜'}</DialogTitle>
         </DialogHeader>
