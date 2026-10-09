@@ -136,7 +136,7 @@ function ThemePanel() {
               ? buildThemeVars(customToParams(savedColors))['--primary']
               : 'var(--primary)'
           } else if (t.id === 'custom') {
-            swatch = 'conic-gradient(from 180deg, #a78bfa, #7dd3fc, #fcd34d, #f0abfc, #a78bfa)'
+            swatch = buildThemeVars(customToParams(custom))['--primary']
           } else {
             swatch = buildThemeVars(PRESETS[t.id])['--primary']
           }

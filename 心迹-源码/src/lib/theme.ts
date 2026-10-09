@@ -8,20 +8,22 @@ export const SAVED_PREFIX = 'saved:'
 
 export interface ThemeParams {
   h: number // 主色相（度）
+  primaryL: number // 主色明度（用于按钮、强调、图表；light ~0.55, dark ~0.72）
   primC: number // 主色饱和度
   bgL: number // 背景明度
   bgC: number // 背景饱和度
+  accH: number // 点缀色相（度，可与主色不同）
   accC: number // 点缀饱和度
 }
 
 // 预设主题：淡雅简约 · 以浅色优雅为主，全部为纯色（无渐变）
 export const PRESETS: Record<string, ThemeParams> = {
-  paper: { h: 280, primC: 0.10, bgL: 0.965, bgC: 0.006, accC: 0.04 }, // 宣纸白
-  dailan: { h: 215, primC: 0.11, bgL: 0.955, bgC: 0.012, accC: 0.05 }, // 黛蓝
-  moon: { h: 250, primC: 0.045, bgL: 0.95, bgC: 0.005, accC: 0.03 }, // 月灰
-  lotus: { h: 350, primC: 0.09, bgL: 0.965, bgC: 0.008, accC: 0.045 }, // 藕荷
-  pine: { h: 160, primC: 0.09, bgL: 0.96, bgC: 0.01, accC: 0.04 }, // 松绿
-  ink: { h: 290, primC: 0.05, bgL: 0.18, bgC: 0.012, accC: 0.03 }, // 墨（深色）
+  paper: { h: 280, primaryL: 0.55, primC: 0.10, bgL: 0.965, bgC: 0.006, accH: 280, accC: 0.04 }, // 宣纸白
+  dailan: { h: 215, primaryL: 0.55, primC: 0.11, bgL: 0.955, bgC: 0.012, accH: 215, accC: 0.05 }, // 黛蓝
+  moon: { h: 250, primaryL: 0.55, primC: 0.045, bgL: 0.95, bgC: 0.005, accH: 250, accC: 0.03 }, // 月灰
+  lotus: { h: 350, primaryL: 0.55, primC: 0.09, bgL: 0.965, bgC: 0.008, accH: 350, accC: 0.045 }, // 藕荷
+  pine: { h: 160, primaryL: 0.55, primC: 0.09, bgL: 0.96, bgC: 0.01, accH: 160, accC: 0.04 }, // 松绿
+  ink: { h: 290, primaryL: 0.72, primC: 0.05, bgL: 0.18, bgC: 0.012, accH: 290, accC: 0.03 }, // 墨（深色）
 }
 
 export const THEME_LIST = [
@@ -44,28 +46,31 @@ export function buildThemeVars(p: ThemeParams): Record<string, string> {
   const light = p.bgL >= 0.6
   const fg = light ? t(0.24, 0.015, h) : t(0.94, 0.02, h)
   const fgMuted = light ? t(0.5, 0.02, h) : t(0.72, 0.03, h)
-  const primaryL = light ? 0.55 : 0.72
-  const primaryFg = light ? t(0.99, 0.005, h) : t(p.bgL, p.bgC, h)
+  // 主色文字：主色亮 → 深色文字；主色暗 → 浅色文字，保证按钮/强调可读
+  const primaryFgLight = t(0.99, 0.005, h)
+  const primaryFgDark = t(0.24, 0.02, h)
+  const primaryFg = p.primaryL > 0.65 ? primaryFgDark : primaryFgLight
   const card = light
     ? t(clamp(p.bgL - 0.02, 0.9, 1), p.bgC + 0.002, h)
     : t(p.bgL + 0.065, p.bgC + 0.005, h)
   const popover = light ? t(0.99, 0.004, h) : t(p.bgL + 0.08, p.bgC + 0.01, h)
   const secondary = light ? t(p.bgL - 0.03, p.bgC, h) : t(p.bgL + 0.14, p.bgC, h)
   const muted = light ? t(p.bgL - 0.045, p.bgC, h) : t(p.bgL + 0.12, p.bgC, h)
-  const accent = light ? t(p.bgL - 0.05, p.accC, h) : t(p.bgL + 0.18, p.accC, h)
+  // 点缀色使用独立的 accH 色相，不再被主色色相覆盖
+  const accent = light ? t(p.bgL - 0.05, p.accC, p.accH) : t(p.bgL + 0.18, p.accC, p.accH)
   const border = light
     ? t(0.5, p.bgC + 0.005, h, 0.26)
     : t(0.42, p.bgC + 0.005, h, 0.45)
   const input = light ? t(p.bgL - 0.03, p.bgC, h) : t(p.bgL + 0.18, p.bgC, h)
-  const ring = t(primaryL, p.primC, h)
+  const ring = t(p.primaryL, p.primC, h)
   const sidebar = light ? t(p.bgL - 0.025, p.bgC, h) : t(p.bgL + 0.03, p.bgC, h)
-  const sidebarAccent = light ? t(p.bgL - 0.05, p.bgC, h) : t(p.bgL + 0.12, p.bgC, h)
+  const sidebarAccent = light ? t(p.bgL - 0.05, p.bgC, p.accH) : t(p.bgL + 0.12, p.bgC, p.accH)
   const sidebarBorder = light
     ? t(0.5, p.bgC + 0.005, h, 0.2)
     : t(0.42, p.bgC + 0.005, h, 0.35)
   const hero = light
-    ? t(p.bgL - 0.04, p.accC + 0.015, h)
-    : t(p.bgL + 0.14, p.accC + 0.02, h)
+    ? t(p.bgL - 0.04, p.accC + 0.015, p.accH)
+    : t(p.bgL + 0.14, p.accC + 0.02, p.accH)
   const heroFg = light ? t(0.24, 0.015, h) : t(0.96, 0.02, h)
 
   const v: Record<string, string> = {
@@ -75,7 +80,7 @@ export function buildThemeVars(p: ThemeParams): Record<string, string> {
     '--card-foreground': fg,
     '--popover': popover,
     '--popover-foreground': fg,
-    '--primary': t(primaryL, p.primC, h),
+    '--primary': t(p.primaryL, p.primC, h),
     '--primary-foreground': primaryFg,
     '--secondary': secondary,
     '--secondary-foreground': fg,
@@ -88,23 +93,23 @@ export function buildThemeVars(p: ThemeParams): Record<string, string> {
     '--input': input,
     '--ring': ring,
     '--success': t(0.6, 0.14, 155),
-    '--success-foreground': primaryFg,
+    '--success-foreground': primaryFgLight,
     '--warning': t(0.72, 0.14, 80),
-    '--warning-foreground': primaryFg,
+    '--warning-foreground': primaryFgLight,
     '--info': t(0.58, 0.13, 250),
-    '--info-foreground': primaryFg,
+    '--info-foreground': primaryFgLight,
     '--theme-red': t(0.6, 0.2, 25),
     '--theme-green': t(0.6, 0.14, 155),
     '--theme-gold': t(0.72, 0.14, 80),
     '--theme-blue': t(0.58, 0.13, 250),
-    '--chart-1': t(primaryL, p.primC, h),
+    '--chart-1': t(p.primaryL, p.primC, h),
     '--chart-2': t(0.6, 0.13, 155),
     '--chart-3': t(0.72, 0.14, 80),
     '--chart-4': t(0.6, 0.2, 25),
     '--chart-5': t(0.58, 0.13, 250),
     '--sidebar': sidebar,
     '--sidebar-foreground': fg,
-    '--sidebar-primary': t(primaryL, p.primC, h),
+    '--sidebar-primary': t(p.primaryL, p.primC, h),
     '--sidebar-primary-foreground': primaryFg,
     '--sidebar-accent': sidebarAccent,
     '--sidebar-accent-foreground': fg,
@@ -154,6 +159,8 @@ function clamp(x: number, lo: number, hi: number) {
 }
 
 // 自定义主题：由用户挑选的三色推导出一整套协调配色
+// 主色取色相+饱和度，明度被限制在 0.35-0.85 之间以保证按钮文字可读
+// 点缀色单独保留色相与饱和度，不再被主色色相覆盖
 export function customToParams(custom: {
   primary: string
   background: string
@@ -164,9 +171,11 @@ export function customToParams(custom: {
   const a = hexToOklch(custom.accent)
   return {
     h: p.h,
+    primaryL: clamp(p.l, 0.35, 0.85),
     primC: clamp(p.c, 0.06, 0.2),
     bgL: clamp(bg.l, 0.12, 0.97),
     bgC: clamp(bg.c, 0.004, 0.06),
+    accH: a.h,
     accC: clamp(a.c, 0.03, 0.14),
   }
 }
