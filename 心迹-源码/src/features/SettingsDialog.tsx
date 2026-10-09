@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   X,
   Plus,
@@ -57,6 +57,57 @@ function download(filename: string, content: string, type: string) {
   a.download = filename
   a.click()
   URL.revokeObjectURL(url)
+}
+
+// 把任意输入规范成 6 位小写 hex（支持 #abc 简写、带或不带 #）；非法返回 null
+function normalizeHex(raw: string): string | null {
+  let h = raw.trim()
+  if (!h) return null
+  if (h[0] !== '#') h = '#' + h
+  if (!/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/.test(h)) return null
+  if (h.length === 4) h = '#' + h.slice(1).split('').map((c) => c + c).join('')
+  return h.toLowerCase()
+}
+
+// 可手动输入色号的颜色字段：输入合法即刻生效并实时预览；非法时红框提示，失焦自动还原
+function HexColorField({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (v: string) => void
+}) {
+  const [text, setText] = useState(value)
+  useEffect(() => {
+    setText(value)
+  }, [value])
+  const valid = normalizeHex(text) !== null
+  return (
+    <input
+      value={text}
+      spellCheck={false}
+      maxLength={7}
+      onChange={(e) => {
+        const t = e.target.value
+        setText(t)
+        const n = normalizeHex(t)
+        if (n) onChange(n)
+      }}
+      onBlur={() => {
+        const n = normalizeHex(text)
+        if (n) onChange(n)
+        else setText(value)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+      }}
+      className={cn(
+        'h-8 w-24 rounded border bg-transparent px-2 font-mono text-xs text-foreground outline-none focus:ring-1',
+        valid ? 'border-border/50 focus:ring-ring' : 'border-destructive'
+      )}
+      aria-invalid={!valid}
+    />
+  )
 }
 
 function ThemePanel() {
@@ -195,9 +246,10 @@ function ThemePanel() {
                 <p className="text-[11px] text-muted-foreground">{row.hint}</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[11px] text-muted-foreground">
-                  {custom[row.key]}
-                </span>
+                <HexColorField
+                  value={custom[row.key]}
+                  onChange={(v) => updateCustom(row.key, v)}
+                />
                 <input
                   type="color"
                   value={custom[row.key]}
