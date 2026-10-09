@@ -17,6 +17,7 @@ import {
   updateFieldToggles,
   exportState,
   importData,
+  mergeData,
   appendData,
   resetAll,
 } from '@/lib/storage'
@@ -30,7 +31,7 @@ import {
   DEFAULT_CUSTOM_THEME,
 } from '@/lib/theme'
 import { fileToStoredImage } from '@/lib/image'
-import { confirmDialog } from '@/components/Confirm'
+import { confirmDialog, choiceDialog } from '@/components/Confirm'
 import { cn } from '@/lib/utils'
 import type { FieldToggles } from '@/lib/types'
 import {
@@ -378,7 +379,25 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   async function handleImportJSON(file: File) {
     try {
       const text = await file.text()
-      importData(text)
+      const hasData =
+        getState().entities.length > 0 ||
+        getState().statusRecords.length > 0 ||
+        getState().divinationRecords.length > 0
+      if (hasData) {
+        const choice = await choiceDialog(
+          '当前已有数据，请选择导入方式：\n\n· 合并当前数据：保留现有数据，并把备份中的新数据并入（相同 id 不重复）。\n· 覆盖当前数据：用备份文件完全替换现有数据，此操作不可撤销。',
+          [
+            { value: 'merge', label: '合并当前数据' },
+            { value: 'overwrite', label: '覆盖当前数据', destructive: true },
+          ],
+          '导入方式'
+        )
+        if (choice === null) return // 取消
+        if (choice === 'merge') mergeData(text)
+        else importData(text)
+      } else {
+        importData(text)
+      }
       toast.success('备份已恢复')
       onOpenChange(false)
     } catch (e) {

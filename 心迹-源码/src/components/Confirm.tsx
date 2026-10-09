@@ -86,3 +86,93 @@ export function ConfirmHost() {
     </AlertDialog>
   )
 }
+
+// ===== 多选一弹窗（用于导入时的「合并 / 覆盖」等选择） =====
+
+export type ChoiceOption = { value: string; label: string; destructive?: boolean }
+
+type ChoiceState = { open: boolean; title: string; message: string; options: ChoiceOption[] }
+type ChoiceListener = () => void
+
+let choiceState: ChoiceState = { open: false, title: '请选择', message: '', options: [] }
+let choiceResolver: ((value: string | null) => void) | null = null
+let choiceListeners: ChoiceListener[] = []
+
+function emitChoice() {
+  for (const l of choiceListeners) l()
+}
+
+/**
+ * 统一的多选一弹窗，返回选中的 value，取消/关闭返回 null。
+ * 用于导入数据时让用户选择「合并当前数据 / 覆盖当前数据」。
+ */
+export function choiceDialog(
+  message: string,
+  options: ChoiceOption[],
+  title = '请选择'
+): Promise<string | null> {
+  // 若上一次尚未关闭，先以取消收尾，避免弹窗堆叠
+  if (choiceResolver) {
+    choiceResolver(null)
+    choiceResolver = null
+  }
+  choiceState = { open: true, title, message, options }
+  emitChoice()
+  return new Promise<string | null>((resolve) => {
+    choiceResolver = resolve
+  })
+}
+
+function useChoiceState(): ChoiceState {
+  const [s, setS] = useState<ChoiceState>(choiceState)
+  useEffect(() => {
+    const handler = () => setS(choiceState)
+    choiceListeners.push(handler)
+    return () => {
+      choiceListeners = choiceListeners.filter((l) => l !== handler)
+    }
+  }, [])
+  return s
+}
+
+export function ChoiceHost() {
+  const s = useChoiceState()
+
+  const settle = (value: string | null) => {
+    choiceState = { open: false, title: s.title, message: s.message, options: s.options }
+    const r = choiceResolver
+    choiceResolver = null
+    emitChoice()
+    r?.(value)
+  }
+
+  return (
+    <AlertDialog
+      open={s.open}
+      onOpenChange={(open) => {
+        if (!open) settle(null)
+      }}
+    >
+      <AlertDialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>{s.title}</AlertDialogTitle>
+          <AlertDialogDescription className="whitespace-pre-line">
+            {s.message}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
+          <AlertDialogCancel onClick={() => settle(null)}>取消</AlertDialogCancel>
+          {s.options.map((o) => (
+            <AlertDialogAction
+              key={o.value}
+              onClick={() => settle(o.value)}
+              className={o.destructive ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : undefined}
+            >
+              {o.label}
+            </AlertDialogAction>
+          ))}
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}

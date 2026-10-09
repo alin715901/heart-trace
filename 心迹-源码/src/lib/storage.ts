@@ -240,6 +240,31 @@ export function exportState(): string {
   return JSON.stringify(state, null, 2)
 }
 
+// 合并导入（JSON 备份）：保留当前数据与设置，按 id 并入文件中的新数据。
+// 相同 id 的条目以当前数据为准，避免重复覆盖。
+export function mergeData(raw: string) {
+  const parsed = JSON.parse(raw)
+  if (!parsed || typeof parsed !== 'object') throw new Error('无效的数据文件')
+  const incoming = {
+    entities: Array.isArray(parsed.entities) ? parsed.entities : [],
+    statusRecords: Array.isArray(parsed.statusRecords) ? parsed.statusRecords : [],
+    divinationRecords: Array.isArray(parsed.divinationRecords) ? parsed.divinationRecords : [],
+  }
+  const mergeById = <T extends { id: string }>(current: T[], add: T[]): T[] => {
+    const map = new Map<string, T>()
+    for (const item of current) map.set(item.id, item) // 当前数据优先
+    for (const item of add) if (!map.has(item.id)) map.set(item.id, item)
+    return [...map.values()]
+  }
+  state = {
+    ...state,
+    entities: mergeById(state.entities, incoming.entities),
+    statusRecords: mergeById(state.statusRecords, incoming.statusRecords),
+    divinationRecords: mergeById(state.divinationRecords, incoming.divinationRecords),
+  }
+  emit()
+}
+
 // 合并导入（CSV 跨设备传输用：追加而非覆盖）
 export function appendData(partial: {
   entities?: Entity[]
