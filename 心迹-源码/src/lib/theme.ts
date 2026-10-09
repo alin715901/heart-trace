@@ -10,6 +10,7 @@ export interface ThemeParams {
   h: number // 主色相（度）
   primaryL: number // 主色明度（用于按钮、强调、图表；light ~0.55, dark ~0.72）
   primC: number // 主色饱和度
+  bgH: number // 背景色相（度，独立于主色，自定义时取用户所选背景的真实色相）
   bgL: number // 背景明度
   bgC: number // 背景饱和度
   accH: number // 点缀色相（度，可与主色不同）
@@ -18,12 +19,12 @@ export interface ThemeParams {
 
 // 预设主题：淡雅简约 · 以浅色优雅为主，全部为纯色（无渐变）
 export const PRESETS: Record<string, ThemeParams> = {
-  paper: { h: 280, primaryL: 0.55, primC: 0.10, bgL: 0.965, bgC: 0.006, accH: 280, accC: 0.04 }, // 宣纸白
-  dailan: { h: 215, primaryL: 0.55, primC: 0.11, bgL: 0.955, bgC: 0.012, accH: 215, accC: 0.05 }, // 黛蓝
-  moon: { h: 250, primaryL: 0.55, primC: 0.045, bgL: 0.95, bgC: 0.005, accH: 250, accC: 0.03 }, // 月灰
-  lotus: { h: 350, primaryL: 0.55, primC: 0.09, bgL: 0.965, bgC: 0.008, accH: 350, accC: 0.045 }, // 藕荷
-  pine: { h: 160, primaryL: 0.55, primC: 0.09, bgL: 0.96, bgC: 0.01, accH: 160, accC: 0.04 }, // 松绿
-  ink: { h: 290, primaryL: 0.72, primC: 0.05, bgL: 0.18, bgC: 0.012, accH: 290, accC: 0.03 }, // 墨（深色）
+  paper: { h: 280, primaryL: 0.55, primC: 0.10, bgH: 280, bgL: 0.965, bgC: 0.006, accH: 280, accC: 0.04 }, // 宣纸白
+  dailan: { h: 215, primaryL: 0.55, primC: 0.11, bgH: 215, bgL: 0.955, bgC: 0.012, accH: 215, accC: 0.05 }, // 黛蓝
+  moon: { h: 250, primaryL: 0.55, primC: 0.045, bgH: 250, bgL: 0.95, bgC: 0.005, accH: 250, accC: 0.03 }, // 月灰
+  lotus: { h: 350, primaryL: 0.55, primC: 0.09, bgH: 350, bgL: 0.965, bgC: 0.008, accH: 350, accC: 0.045 }, // 藕荷
+  pine: { h: 160, primaryL: 0.55, primC: 0.09, bgH: 160, bgL: 0.96, bgC: 0.01, accH: 160, accC: 0.04 }, // 松绿
+  ink: { h: 290, primaryL: 0.72, primC: 0.05, bgH: 290, bgL: 0.18, bgC: 0.012, accH: 290, accC: 0.03 }, // 墨（深色）
 }
 
 export const THEME_LIST = [
@@ -42,7 +43,8 @@ function t(l: number, c: number, h: number, alpha?: number) {
 
 // 由一组参数生成完整配色变量
 export function buildThemeVars(p: ThemeParams): Record<string, string> {
-  const h = p.h
+  const h = p.h // 主色相（用于主色、强调、图表、文字）
+  const bh = p.bgH // 背景色相（独立于主色，背景及其衍生色族用它）
   const light = p.bgL >= 0.6
   const fg = light ? t(0.24, 0.015, h) : t(0.94, 0.02, h)
   const fgMuted = light ? t(0.5, 0.02, h) : t(0.72, 0.03, h)
@@ -50,31 +52,32 @@ export function buildThemeVars(p: ThemeParams): Record<string, string> {
   const primaryFgLight = t(0.99, 0.005, h)
   const primaryFgDark = t(0.24, 0.02, h)
   const primaryFg = p.primaryL > 0.65 ? primaryFgDark : primaryFgLight
+  // 背景族颜色一律使用背景自身的色相 bh，保证“背景色按用户所选”生效
   const card = light
-    ? t(clamp(p.bgL - 0.02, 0.9, 1), p.bgC + 0.002, h)
-    : t(p.bgL + 0.065, p.bgC + 0.005, h)
-  const popover = light ? t(0.99, 0.004, h) : t(p.bgL + 0.08, p.bgC + 0.01, h)
-  const secondary = light ? t(p.bgL - 0.03, p.bgC, h) : t(p.bgL + 0.14, p.bgC, h)
-  const muted = light ? t(p.bgL - 0.045, p.bgC, h) : t(p.bgL + 0.12, p.bgC, h)
+    ? t(clamp(p.bgL - 0.02, 0.9, 1), p.bgC + 0.002, bh)
+    : t(p.bgL + 0.065, p.bgC + 0.005, bh)
+  const popover = light ? t(0.99, 0.004, bh) : t(p.bgL + 0.08, p.bgC + 0.01, bh)
+  const secondary = light ? t(p.bgL - 0.03, p.bgC, bh) : t(p.bgL + 0.14, p.bgC, bh)
+  const muted = light ? t(p.bgL - 0.045, p.bgC, bh) : t(p.bgL + 0.12, p.bgC, bh)
   // 点缀色使用独立的 accH 色相，不再被主色色相覆盖
   const accent = light ? t(p.bgL - 0.05, p.accC, p.accH) : t(p.bgL + 0.18, p.accC, p.accH)
   const border = light
-    ? t(0.5, p.bgC + 0.005, h, 0.26)
-    : t(0.42, p.bgC + 0.005, h, 0.45)
-  const input = light ? t(p.bgL - 0.03, p.bgC, h) : t(p.bgL + 0.18, p.bgC, h)
+    ? t(0.5, p.bgC + 0.005, bh, 0.26)
+    : t(0.42, p.bgC + 0.005, bh, 0.45)
+  const input = light ? t(p.bgL - 0.03, p.bgC, bh) : t(p.bgL + 0.18, p.bgC, bh)
   const ring = t(p.primaryL, p.primC, h)
-  const sidebar = light ? t(p.bgL - 0.025, p.bgC, h) : t(p.bgL + 0.03, p.bgC, h)
+  const sidebar = light ? t(p.bgL - 0.025, p.bgC, bh) : t(p.bgL + 0.03, p.bgC, bh)
   const sidebarAccent = light ? t(p.bgL - 0.05, p.bgC, p.accH) : t(p.bgL + 0.12, p.bgC, p.accH)
   const sidebarBorder = light
-    ? t(0.5, p.bgC + 0.005, h, 0.2)
-    : t(0.42, p.bgC + 0.005, h, 0.35)
+    ? t(0.5, p.bgC + 0.005, bh, 0.2)
+    : t(0.42, p.bgC + 0.005, bh, 0.35)
   const hero = light
     ? t(p.bgL - 0.04, p.accC + 0.015, p.accH)
     : t(p.bgL + 0.14, p.accC + 0.02, p.accH)
   const heroFg = light ? t(0.24, 0.015, h) : t(0.96, 0.02, h)
 
   const v: Record<string, string> = {
-    '--background': t(p.bgL, p.bgC, h),
+    '--background': t(p.bgL, p.bgC, bh),
     '--foreground': fg,
     '--card': card,
     '--card-foreground': fg,
@@ -173,6 +176,7 @@ export function customToParams(custom: {
     h: p.h,
     primaryL: clamp(p.l, 0.35, 0.85),
     primC: clamp(p.c, 0.06, 0.2),
+    bgH: bg.h,
     bgL: clamp(bg.l, 0.12, 0.97),
     bgC: clamp(bg.c, 0.004, 0.06),
     accH: a.h,

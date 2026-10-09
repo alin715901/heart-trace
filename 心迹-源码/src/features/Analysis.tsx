@@ -258,6 +258,28 @@ export function Analysis({ entity }: { entity: Entity }) {
     [periodStatus, perceptionMode]
   )
 
+  // 占卜标点：仅在开启开关且当日有占卜记录时，于趋势曲线上画一个圆点标记。
+  // recharts 在运行时会忽略返回 null 的点（即不画标记），但 dot 的类型要求返回 ReactElement，
+  // 这里用 as any 放宽类型限制。
+  const renderDivDot = ((props: any) => {
+    const { cx, cy, payload } = props
+    if (cx == null || cy == null) return null
+    if (showDivination && (payload?.divs?.length ?? 0) > 0) {
+      return (
+        <circle
+          key={payload?.key}
+          cx={cx}
+          cy={cy}
+          r={5}
+          fill={tv['--chart-3']}
+          stroke={tv['--foreground']}
+          strokeWidth={1}
+        />
+      )
+    }
+    return null
+  }) as any
+
   return (
     <div className="flex flex-col gap-6">
       {/* 趋势图 */}
@@ -366,21 +388,10 @@ export function Analysis({ entity }: { entity: Entity }) {
                 dataKey="score"
                 stroke={tv['--primary']}
                 strokeWidth={2.5}
-                dot={false}
+                dot={renderDivDot}
                 activeDot={{ r: 5 }}
                 connectNulls
               />
-              {showDivination && (
-                <Line
-                  type="monotone"
-                  dataKey="divY"
-                  stroke="transparent"
-                  dot={{ r: 5, fill: tv['--chart-3'], stroke: tv['--foreground'], strokeWidth: 1 }}
-                  activeDot={{ r: 6 }}
-                  connectNulls={false}
-                  isAnimationActive={false}
-                />
-              )}
             </LineChart>
           </ResponsiveContainer>
         )}
