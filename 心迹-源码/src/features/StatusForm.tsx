@@ -114,13 +114,12 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass h-[min(85vh,680px)] max-w-[calc(100%-1.5rem)] overflow-y-auto border-border/40 p-5 sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="glass flex h-[min(85vh,680px)] max-w-[calc(100%-1.5rem)] flex-col overflow-hidden border-border/40 p-0 sm:max-w-lg">
+        <DialogHeader className="shrink-0 px-5 pt-5">
           <DialogTitle>{isEdit ? '编辑状态记录' : '记录状态'}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-1 rounded-lg border border-border/60 bg-muted/40 p-1">
+        <div className="flex gap-1 rounded-lg border border-border/60 bg-muted/40 p-1 mx-5 mt-3 shrink-0">
             {STATUS_TABS.map((t) => (
               <button
                 type="button"
@@ -138,6 +137,7 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
             ))}
           </div>
 
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 flex flex-col gap-4">
           {tab === 'time' && (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
@@ -340,9 +340,9 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
               </div>
             </div>
           )}
-        </div>
+          </div>
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0 border-t border-border/40 bg-background px-5 py-3">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             取消
           </Button>
