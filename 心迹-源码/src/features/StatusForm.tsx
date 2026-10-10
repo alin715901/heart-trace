@@ -264,8 +264,6 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
               )}
             </div>
           )}
-        </div>
-
           {tab === 'body' && (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-4">
@@ -342,6 +340,7 @@ export function StatusForm({ open, onOpenChange, entityId, record }: StatusFormP
               </div>
             </div>
           )}
+        </div>
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
