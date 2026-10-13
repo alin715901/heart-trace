@@ -7,9 +7,112 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content="心迹：梦角与占卜记录、趋势分析与跨设备备份的网页工作台" />
     <meta name="author" content="Genie" />
+    <style>
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(120% 120% at 50% 28%, #f4f0fe 0%, #e9e3fb 46%, #ddd3f5 100%);
+        transition: opacity 0.55s ease, visibility 0.55s ease;
+      }
+      #splash.splash--hide {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .splash-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        animation: splash-rise 0.8s ease both;
+      }
+      @keyframes splash-rise {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: none; }
+      }
+      .splash-logo {
+        width: 88px;
+        height: 88px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 24px;
+        background: #ffffff;
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.25);
+        animation: splash-pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes splash-pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(139, 92, 246, 0.22); }
+        50% { transform: scale(1.06); box-shadow: 0 14px 40px rgba(139, 92, 246, 0.35); }
+      }
+      .splash-logo svg { width: 56px; height: 56px; }
+      .splash-title {
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        color: #5b21b6;
+        margin-left: 0.18em;
+      }
+      .splash-sub {
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        font-size: 13px;
+        color: #7c6aa8;
+        letter-spacing: 0.05em;
+      }
+      .splash-bar {
+        width: 140px;
+        height: 3px;
+        border-radius: 3px;
+        background: rgba(139, 92, 246, 0.15);
+        overflow: hidden;
+        margin-top: 6px;
+      }
+      .splash-bar span {
+        display: block;
+        height: 100%;
+        width: 40%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, #a78bfa, #7c3aed);
+        animation: splash-load 1.1s ease-in-out infinite;
+      }
+      @keyframes splash-load {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(350%); }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div id="splash">
+      <div class="splash-inner">
+        <div class="splash-logo">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <g
+              transform="translate(6.4 6.4) scale(2.133)"
+              stroke="#8B5CF6"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              fill="none"
+            >
+              <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
+              <path d="M20 3v4" />
+              <path d="M22 5h-4" />
+              <path d="M4 17v2" />
+              <path d="M5 18H3" />
+            </g>
+          </svg>
+        </div>
+        <div class="splash-title">心迹</div>
+        <div class="splash-sub">为灵魂链接而生的记录工作台</div>
+        <div class="splash-bar"><span></span></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
