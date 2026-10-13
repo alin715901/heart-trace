@@ -6,7 +6,7 @@ createRoot(document.getElementById('root')!).render(<App />)
 
 // 开屏淡出：等首帧绘制后再隐藏，并保留最短展示时间让动画不被闪过
 const splash = document.getElementById('splash')
-const MIN_DURATION = 700
+const MIN_DURATION = 2000
 const start = Date.now()
 let hidden = false
 
