@@ -229,29 +229,36 @@ export function cardOpacityValue(settings: Settings): number {
   return Math.min(100, Math.max(0, Math.round(raw)))
 }
 
+// 背景图片图层：独立固定铺底，置于内容之下且不拦截任何指针事件，
+// 避免写到 body 上（`background-attachment: fixed`）与弹窗毛玻璃冲突导致控件无法拖动。
+let bgEl: HTMLDivElement | null = null
+function getBgEl(): HTMLDivElement {
+  if (!bgEl) {
+    bgEl = document.createElement('div')
+    bgEl.id = 'app-bg'
+    bgEl.style.cssText =
+      'position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center;' +
+      'background-repeat:no-repeat;pointer-events:none;'
+    document.body.appendChild(bgEl)
+  }
+  return bgEl
+}
+
 // 应用背景图片：有图时给卡片加实，保证文字可读
 export function applyBackground(settings: Settings) {
   const root = document.documentElement
   const img = settings.backgroundImage
-  const body = document.body
   const alpha = cardOpacityValue(settings)
   root.style.setProperty('--glass-alpha', `${alpha}%`)
   // 越透的卡片，背后模糊越轻，背景图看得越清楚
   root.style.setProperty('--glass-alpha-num', String(alpha / 100))
+  const el = getBgEl()
   if (img) {
     root.dataset.bg = 'true'
-    body.style.backgroundImage = `url("${img}")`
-    body.style.backgroundSize = 'cover'
-    body.style.backgroundPosition = 'center'
-    body.style.backgroundAttachment = 'fixed'
-    body.style.backgroundRepeat = 'no-repeat'
+    el.style.backgroundImage = `url("${img}")`
   } else {
     delete root.dataset.bg
-    body.style.backgroundImage = ''
-    body.style.backgroundSize = ''
-    body.style.backgroundPosition = ''
-    body.style.backgroundAttachment = ''
-    body.style.backgroundRepeat = ''
+    el.style.backgroundImage = ''
   }
 }
 

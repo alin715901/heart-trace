@@ -240,27 +240,85 @@ export function exportState(): string {
   return JSON.stringify(state, null, 2)
 }
 
-// 合并导入（JSON 备份）：保留当前数据与设置，按 id 并入文件中的新数据。
-// 相同 id 的条目以当前数据为准，避免重复覆盖。
+// 合并导入（JSON 备份）：保留当前数据与设置，并入文件中的新数据。
+// 关键点：不同设备导出的同一主体 id 不同，因此按「姓名」识别同一人，
+// 并把导入记录映射到当前主体 id；记录再按「主体 + 时间 + 内容」去重，
+// 避免同一个人/同一条记录被重复导入变成两份。
 export function mergeData(raw: string) {
   const parsed = JSON.parse(raw)
   if (!parsed || typeof parsed !== 'object') throw new Error('无效的数据文件')
-  const incoming = {
-    entities: Array.isArray(parsed.entities) ? parsed.entities : [],
-    statusRecords: Array.isArray(parsed.statusRecords) ? parsed.statusRecords : [],
-    divinationRecords: Array.isArray(parsed.divinationRecords) ? parsed.divinationRecords : [],
+  const incomingEntities: Entity[] = Array.isArray(parsed.entities) ? parsed.entities : []
+  const incomingStatus: StatusRecord[] = Array.isArray(parsed.statusRecords) ? parsed.statusRecords : []
+  const incomingDiv: DivinationRecord[] = Array.isArray(parsed.divinationRecords) ? parsed.divinationRecords : []
+
+  const norm = (s?: string) => (s || '').trim().toLowerCase()
+
+  // 1) 主体按姓名合并：同名视为同一人，保留当前主体并把记录映射到当前 id
+  const nameToId = new Map<string, string>()
+  for (const e of state.entities) nameToId.set(norm(e.name), e.id)
+  const idMap = new Map<string, string>() // 导入主体的旧 id -> 当前 id
+  const newEntities: Entity[] = []
+  for (const e of incomingEntities) {
+    const key = norm(e.name)
+    if (nameToId.has(key)) {
+      const curId = nameToId.get(key)!
+      idMap.set(e.id, curId)
+      // 合并标签，避免丢失对方主体的标签
+      const cur = state.entities.find((x) => x.id === curId)!
+      const mergedTags = Array.from(new Set([...cur.tags, ...(e.tags || [])]))
+      state.entities = state.entities.map((x) => (x.id === curId ? { ...x, tags: mergedTags } : x))
+    } else {
+      nameToId.set(key, e.id)
+      newEntities.push(e)
+    }
   }
-  const mergeById = <T extends { id: string }>(current: T[], add: T[]): T[] => {
-    const map = new Map<string, T>()
-    for (const item of current) map.set(item.id, item) // 当前数据优先
-    for (const item of add) if (!map.has(item.id)) map.set(item.id, item)
-    return [...map.values()]
+  const mergedEntities = [...state.entities, ...newEntities]
+
+  // 2) 记录去重签名：主体 id + 发生时间 + 关键内容（不含 id / 图片，跨设备才可比）
+  const recordSig = (r: StatusRecord | DivinationRecord, entityId: string): string => {
+    const base = `${entityId}|${r.recordedAt}`
+    if ('level' in r) {
+      const s = r as StatusRecord
+      return base + '|' + JSON.stringify([
+        s.level, s.descTags, s.freeText, s.factorsPreset, s.factorsCustom,
+        s.factorFree, s.sensationParts, s.sensationFeelings, s.perceptions, s.sensationFree,
+      ])
+    }
+    const d = r as DivinationRecord
+    return base + '|' + JSON.stringify([
+      d.method, d.cards, d.question, d.result, d.thoughts, d.verifyStatus, d.verifyNote,
+    ])
   }
+
+  const statusSigs = new Set(state.statusRecords.map((r) => recordSig(r, r.entityId)))
+  const mergedStatus: StatusRecord[] = [...state.statusRecords]
+  for (const r of incomingStatus) {
+    const eid = idMap.get(r.entityId) ?? r.entityId
+    const rr = { ...r, entityId: eid }
+    const sig = recordSig(rr, eid)
+    if (!statusSigs.has(sig)) {
+      statusSigs.add(sig)
+      mergedStatus.push(rr)
+    }
+  }
+
+  const divSigs = new Set(state.divinationRecords.map((r) => recordSig(r, r.entityId)))
+  const mergedDiv: DivinationRecord[] = [...state.divinationRecords]
+  for (const r of incomingDiv) {
+    const eid = idMap.get(r.entityId) ?? r.entityId
+    const rr = { ...r, entityId: eid }
+    const sig = recordSig(rr, eid)
+    if (!divSigs.has(sig)) {
+      divSigs.add(sig)
+      mergedDiv.push(rr)
+    }
+  }
+
   state = {
     ...state,
-    entities: mergeById(state.entities, incoming.entities),
-    statusRecords: mergeById(state.statusRecords, incoming.statusRecords),
-    divinationRecords: mergeById(state.divinationRecords, incoming.divinationRecords),
+    entities: mergedEntities,
+    statusRecords: mergedStatus,
+    divinationRecords: mergedDiv,
   }
   emit()
 }
