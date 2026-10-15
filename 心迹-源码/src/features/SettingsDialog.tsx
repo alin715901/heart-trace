@@ -385,7 +385,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         getState().divinationRecords.length > 0
       if (hasData) {
         const choice = await choiceDialog(
-          '当前已有数据，请选择导入方式：\n\n· 合并当前数据：保留现有数据，并把备份中的新数据并入（相同 id 不重复）。\n· 覆盖当前数据：用备份文件完全替换现有数据，此操作不可撤销。',
+          '当前已有数据，请选择导入方式：\n\n· 合并当前数据：保留现有数据，并把备份中的新数据并入（同名主体会合并为同一人，记录按内容去重）。\n· 覆盖当前数据：用备份文件完全替换现有数据，此操作不可撤销。',
           [
             { value: 'merge', label: '合并当前数据' },
             { value: 'overwrite', label: '覆盖当前数据', destructive: true },
@@ -481,6 +481,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             <p className="text-xs text-muted-foreground">
               当前共有 {entities.length} 个主体、{statusRecords.length + divinationRecords.length} 条记录。
               跨设备建议使用「备份(JSON)」整体迁移，或「CSV」在表格间传输。
+            </p>
+            <p className="text-xs text-amber-600/90">
+              合并数据会将同一个名字的数据合并，请仔细核对主体。
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="secondary" onClick={handleExportJSON}>
