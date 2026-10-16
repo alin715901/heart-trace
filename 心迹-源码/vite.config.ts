@@ -3,11 +3,14 @@ import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react-swc"
 import {defineConfig} from "vite"
 import process from "process"
+import {viteSingleFile} from "vite-plugin-singlefile"
+
+const single = process.env.SINGLE_FILE === "1"
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/heart-trace/',
-  plugins: [react(), tailwindcss()],
+  base: single ? "/" : '/heart-trace/',
+  plugins: [react(), tailwindcss(), ...(single ? [viteSingleFile()] : [])],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

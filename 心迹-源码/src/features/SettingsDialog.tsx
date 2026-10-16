@@ -485,6 +485,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             <p className="text-xs text-amber-600/90">
               合并数据会将同一个名字的数据合并，请仔细核对主体。
             </p>
+            <p className="text-xs text-amber-600/90">
+              建议定期导出数据备份，以免数据丢失。
+            </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="secondary" onClick={handleExportJSON}>
                 <Download className="size-4" />
