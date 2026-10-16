@@ -6,10 +6,11 @@ import process from "process"
 import {viteSingleFile} from "vite-plugin-singlefile"
 
 const single = process.env.SINGLE_FILE === "1"
+const base = single ? "/" : (process.env.NETLIFY === "1" ? "/" : "/heart-trace/")
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: single ? "/" : '/heart-trace/',
+  base,
   plugins: [react(), tailwindcss(), ...(single ? [viteSingleFile()] : [])],
   resolve: {
     alias: {
