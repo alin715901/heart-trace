@@ -128,8 +128,9 @@ function Welcome({ onCreate, hasEntities }: { onCreate: () => void; hasEntities:
       <div>
         <h2 className="font-serif-x text-2xl font-semibold">欢迎来到「心迹」</h2>
         <p className="mt-1 max-w-md text-sm text-muted-foreground">
-          为灵魂链接而生的记录工作台。记录状态强弱与占卜灵光，
-          让时间替你看见脉络。
+          为灵魂链接而生的记录工作台。
+          <br />
+          记录状态强弱与占卜灵光，让时间替你看见脉络。
         </p>
       </div>
       <Button size="lg" onClick={onCreate}>
