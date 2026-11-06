@@ -25,7 +25,9 @@ jobs:
         run: |
           cd 心迹-源码
           npm install
-          npm run build
+          VERSION=$(python3 -c "import json;print(json.load(open('public/version.json'))['version'])")
+          CODE=$(python3 -c "import json;print(json.load(open('public/version.json'))['code'])")
+          VITE_APP_VERSION=$VERSION VITE_BUILD_CODE=$CODE npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

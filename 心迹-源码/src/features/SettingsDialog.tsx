@@ -33,6 +33,7 @@ import {
 import { fileToStoredImage } from '@/lib/image'
 import { confirmDialog, choiceDialog } from '@/components/Confirm'
 import { cn } from '@/lib/utils'
+import { VersionInfo } from '@/features/VersionInfo'
 import type { FieldToggles } from '@/lib/types'
 import {
   Dialog,
@@ -482,6 +483,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               当前共有 {entities.length} 个主体、{statusRecords.length + divinationRecords.length} 条记录。
               跨设备建议使用「备份(JSON)」整体迁移，或「CSV」在表格间传输。
             </p>
+            <VersionInfo />
             <p className="text-xs text-amber-600/90">
               合并数据会将同一个名字的数据合并，请仔细核对主体。
             </p>

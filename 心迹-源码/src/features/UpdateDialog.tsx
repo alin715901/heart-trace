@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import {
   ApkUpdater,
   APP_VERSION,
+  SHOW_UPDATE_EVENT,
   checkUpdate,
   type ListenerHandle,
   type UpdateInfo,
@@ -46,6 +47,18 @@ export function UpdateHost() {
       window.clearTimeout(timer)
       listener.current?.remove().catch(() => {})
     }
+  }, [])
+
+  // 响应「设置 → 数据 → 检查版本」：手动发现新版本时弹出同一个更新窗口
+  useEffect(() => {
+    const onShow = (e: Event) => {
+      const detail = (e as CustomEvent<UpdateInfo>).detail
+      if (!detail) return
+      setInfo(detail)
+      setPhase('prompt')
+    }
+    window.addEventListener(SHOW_UPDATE_EVENT, onShow)
+    return () => window.removeEventListener(SHOW_UPDATE_EVENT, onShow)
   }, [])
 
   async function startUpdate() {
@@ -107,7 +120,7 @@ export function UpdateHost() {
           </AlertDialogTitle>
           <AlertDialogDescription className="whitespace-pre-line">
             {phase === 'prompt' &&
-              `心迹有新版本可用（当前 v${APP_VERSION}）。\n${info.notes || '包含体验优化与问题修复。'}\n更新为覆盖安装，已有记录不会丢失。`}
+              `发现新版本 v${info.version}（当前 v${APP_VERSION}）。\n${info.notes || '包含体验优化与问题修复。'}\n更新为覆盖安装，已有记录不会丢失。`}
             {phase === 'downloading' &&
               '请在下载完成后按系统提示安装，期间请保持网络畅通。'}
             {phase === 'installing' &&
