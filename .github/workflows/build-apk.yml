@@ -150,6 +150,16 @@ jobs:
           curl -sS -f -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Content-Type: application/octet-stream"             --data-binary "@${APK}"             "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RID}/assets?name=heart-trace.apk"
           echo "上传完成: heart-trace.apk"
 
+      - name: 重建网站产物
+        run: |
+          cd 心迹-源码
+          # 网页部署在 /heart-trace/ 子路径，必须按子路径构建；
+          # 前面的根路径产物仅供安装包内嵌网页使用
+          npm run build
+          test -s dist/heart-trace.apk
+          test -s dist/version.json
+          grep -q '/heart-trace/assets/' dist/index.html && echo "网页资源路径已修正"
+
       - name: 上传网站产物
         uses: actions/upload-pages-artifact@v3
         with:

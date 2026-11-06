@@ -115,5 +115,34 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // 兜底：主程序加载失败时自动收起开屏，并给出可操作的提示，避免永久停在启动画面
+      (function () {
+        var done = false
+        function finish() {
+          if (done) return
+          done = true
+          var root = document.getElementById('root')
+          var s = document.getElementById('splash')
+          if (root && !root.childElementCount) {
+            root.innerHTML =
+              '<div style="position:fixed;inset:0;display:flex;flex-direction:column;' +
+              'align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;' +
+              'font-family:-apple-system,BlinkMacSystemFont,\'PingFang SC\',\'Microsoft YaHei\',sans-serif;' +
+              'background:#f7f4fe;color:#5b21b6">' +
+              '<div style="font-size:20px;font-weight:700">页面没能加载完成</div>' +
+              '<div style="font-size:14px;color:#7c6aa8">请检查网络后刷新重试</div>' +
+              '<button onclick="location.reload()" style="margin-top:8px;padding:10px 22px;' +
+              'border:0;border-radius:10px;background:#8B5CF6;color:#fff;font-size:15px;' +
+              'cursor:pointer">刷新页面</button></div>'
+          }
+          if (s) {
+            s.classList.add('splash--hide')
+            setTimeout(function () { s.remove() }, 800)
+          }
+        }
+        setTimeout(finish, 8000)
+      })()
+    </script>
   </body>
 </html>
