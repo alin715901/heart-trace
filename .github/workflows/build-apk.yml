@@ -113,10 +113,25 @@ jobs:
           cd 心迹-源码/android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk ../dist/heart-trace.apk
-          cp app/build/outputs/apk/debug/app-debug.apk ../dist/心迹.apk
-          cp app/build/outputs/apk/debug/app-debug.apk ../public/heart-trace.apk
-          cp app/build/outputs/apk/debug/app-debug.apk ../public/心迹.apk
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          KS=app/xinji.keystore
+          base64 -d ../debug.keystore.b64 > "$KS"
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          APKSIGNER=$(find "$SDK_ROOT/build-tools" -type f -name apksigner 2>/dev/null | sort -V | tail -1)
+          echo "apksigner: $APKSIGNER"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" sign --ks "$KS" --ks-key-alias androiddebugkey \
+            --ks-pass pass:android --key-pass pass:android \
+            --v1-signing-enabled true --v2-signing-enabled true \
+            --out "$APK.signed" "$APK"
+          mv "$APK.signed" "$APK"
+          CERT=$("$APKSIGNER" verify --print-certs "$APK" | grep -i 'SHA-256' | head -1 | tr -d ' :' | tr 'A-F' 'a-f')
+          echo "安装包证书: $CERT"
+          echo "$CERT" | grep -q '2226a45a9cb646a9' || { echo "签名未固定，终止发布"; exit 1; }
+          cp "$APK" ../dist/heart-trace.apk
+          cp "$APK" ../dist/心迹.apk
+          cp "$APK" ../public/heart-trace.apk
+          cp "$APK" ../public/心迹.apk
 
       - name: 上传安装包
         uses: actions/upload-artifact@v4
