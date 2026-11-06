@@ -2,6 +2,10 @@ name: 构建心迹APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '心迹-源码/.apk-rebuild'
 
 permissions:
   contents: write
@@ -53,6 +57,25 @@ jobs:
           sed -i 's#<string name="title_activity_main">[^<]*</string>#<string name="title_activity_main">心迹</string>#' android/app/src/main/res/values/strings.xml
           grep -E 'app_name|title_activity_main' android/app/src/main/res/values/strings.xml
           unzip -o android-icons.zip -d android/app/src/main/res/
+          pip install --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image
+          import glob
+          for f in glob.glob('android/app/src/main/res/mipmap-*/ic_launcher_foreground.png'):
+              im = Image.open(f).convert('RGBA')
+              bbox = im.getchannel('A').getbbox()
+              ratio = (bbox[2] - bbox[0]) / im.width
+              if ratio <= 0.55:
+                  print('already small', f, round(ratio, 3))
+                  continue
+              star = im.crop(bbox)
+              nw, nh = round(star.width * 0.81), round(star.height * 0.81)
+              star = star.resize((nw, nh), Image.LANCZOS)
+              out = Image.new('RGBA', im.size, (0, 0, 0, 0))
+              out.alpha_composite(star, ((im.width - nw) // 2, (im.height - nh) // 2))
+              out.save(f)
+              print('shrunk', f, nw, nh)
+          PY
           find android/app/src/main/res/values -type f -name '*.xml' -print0 | xargs -0 -r sed -i -E 's/(<color name="ic_launcher_background">)[^<]*(<\/color>)/\1#EFE9FF\2/g'
           ls -l android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
