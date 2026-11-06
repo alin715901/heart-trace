@@ -8,15 +8,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 下载安装包
+      - name: 准备安装包与下载页
         run: |
           mkdir -p 心迹-源码/public
-          curl -sSL -f -o "心迹-源码/public/心迹.apk" "https://github.com/alin715901/heart-trace/releases/download/apk-5/heart-trace.apk"
-          ls -lh "心迹-源码/public/心迹.apk"
+          curl -sSL -f -o "心迹-源码/public/heart-trace.apk" "https://github.com/alin715901/heart-trace/releases/download/apk-5/heart-trace.apk"
+          cp "心迹-源码/public/heart-trace.apk" "心迹-源码/public/心迹.apk"
+          echo PCFkb2N0eXBlIGh0bWw+CjxodG1sIGxhbmc9InpoLUNOIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9InV0Zi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCxpbml0aWFsLXNjYWxlPTEiPgo8dGl0bGU+5b+D6L+5IMK3IOS4i+i9veWuieijheWMhTwvdGl0bGU+CjxzdHlsZT5ib2R5e2ZvbnQtZmFtaWx5Oi1hcHBsZS1zeXN0ZW0sc3lzdGVtLXVpLHNhbnMtc2VyaWY7YmFja2dyb3VuZDojZmFmN2YyO2NvbG9yOiMzYTMzMmM7ZGlzcGxheTpmbGV4O2ZsZXgtZGlyZWN0aW9uOmNvbHVtbjthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OmNlbnRlcjttaW4taGVpZ2h0OjEwMHZoO21hcmdpbjowO3RleHQtYWxpZ246Y2VudGVyO3BhZGRpbmc6MnJlbX1oMXtmb250LXNpemU6MnJlbTtsZXR0ZXItc3BhY2luZzouMzVlbTttYXJnaW46MCAwIC42cmVtfXB7Y29sb3I6IzhhN2Y3MjtsaW5lLWhlaWdodDoxLjh9YXtjb2xvcjojYTk3MTRiO2ZvbnQtd2VpZ2h0OjYwMH08L3N0eWxlPgo8L2hlYWQ+Cjxib2R5Pgo8aDE+5b+D6L+5PC9oMT4KPHA+5q2j5Zyo5LiL6L295a6J6KOF5YyF4oCmPC9wPgo8cD7oi6XmnKroh6rliqjlvIDlp4vvvIzor7cgPGEgaWQ9ImRsIiBocmVmPSJoZWFydC10cmFjZS5hcGsiIGRvd25sb2FkPSLlv4Pov7kuYXBrIj7ngrnmraTkuIvovb0g5b+D6L+5LmFwazwvYT48L3A+CjxzY3JpcHQ+ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2RsJykuY2xpY2soKTs8L3NjcmlwdD4KPC9ib2R5Pgo8L2h0bWw+ | base64 -d > "心迹-源码/public/download.html"
+          ls -lh 心迹-源码/public/
       - name: 提交到网站
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f "心迹-源码/public/心迹.apk"
-          git commit -m "发布：心迹.apk" || echo "无变更"
+          git add -f "心迹-源码/public/heart-trace.apk" "心迹-源码/public/心迹.apk" "心迹-源码/public/download.html"
+          git commit -m "发布：中文名安装包与下载页" || echo "无变更"
           git push
