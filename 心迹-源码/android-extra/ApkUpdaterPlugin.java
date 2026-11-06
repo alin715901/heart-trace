@@ -89,15 +89,27 @@ public class ApkUpdaterPlugin extends Plugin {
                 if (out.exists()) {
                     out.delete();
                 }
+                // 立即回报总大小，进度条一开始就显示明确进度
+                JSObject start = new JSObject();
+                start.put("percent", 0);
+                start.put("received", 0);
+                start.put("total", total);
+                notifyListeners("progress", start);
                 try (InputStream in = conn.getInputStream();
                      FileOutputStream fos = new FileOutputStream(out)) {
                     byte[] buffer = new byte[16384];
                     long received = 0;
+                    int lastPercent = -1;
                     int n;
                     while ((n = in.read(buffer)) != -1) {
                         fos.write(buffer, 0, n);
                         received += n;
                         int percent = total > 0 ? (int) (received * 100 / total) : -1;
+                        // 仅在百分比变化时回调，避免过多事件造成界面卡顿
+                        if (total > 0 && percent == lastPercent) {
+                            continue;
+                        }
+                        lastPercent = percent;
                         JSObject data = new JSObject();
                         data.put("percent", percent);
                         data.put("received", received);

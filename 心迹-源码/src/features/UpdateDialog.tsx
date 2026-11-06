@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -21,15 +19,20 @@ import {
 
 type Phase = 'idle' | 'prompt' | 'downloading' | 'installing' | 'failed'
 
+function mb(n: number): string {
+  return (n / 1024 / 1024).toFixed(1) + ' MB'
+}
+
 /**
  * 应用内更新：启动后检查新版本，可选择更新或暂不更新；
- * 更新时在应用内下载并显示进度，完成后拉起系统安装界面；
+ * 更新时保持弹窗打开并显示下载进度，完成后拉起系统安装界面；
  * 失败则给出手动更新入口。
  */
 export function UpdateHost() {
   const [info, setInfo] = useState<UpdateInfo | null>(null)
   const [phase, setPhase] = useState<Phase>('idle')
   const [percent, setPercent] = useState(0)
+  const [bytes, setBytes] = useState({ received: 0, total: 0 })
   const [error, setError] = useState('')
   const listener = useRef<ListenerHandle | null>(null)
 
@@ -63,19 +66,25 @@ export function UpdateHost() {
 
   async function startUpdate() {
     if (!info) return
+    // 关键：切到下载态后必须让弹窗保持打开，进度条才会显示。
+    // 所有按钮都用普通按钮，避免点击时被弹窗组件自动关闭并清空状态。
     setPhase('downloading')
     setPercent(0)
+    setBytes({ received: 0, total: 0 })
     setError('')
     try {
       listener.current = await ApkUpdater.addListener('progress', (d) => {
         if (typeof d.percent === 'number' && d.percent >= 0) {
           setPercent(Math.min(100, Math.round(d.percent)))
         }
+        if (typeof d.received === 'number' && typeof d.total === 'number') {
+          setBytes({ received: d.received, total: d.total })
+        }
       })
       const { path } = await ApkUpdater.download({ url: info.apkUrl })
       setPercent(100)
-      await ApkUpdater.install({ path })
       setPhase('installing')
+      await ApkUpdater.install({ path })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
       setPhase('failed')
@@ -103,10 +112,15 @@ export function UpdateHost() {
 
   if (phase === 'idle' || !info) return null
 
+  const inProgress = phase === 'downloading' || phase === 'installing'
+  const known = bytes.total > 0
+
   return (
     <AlertDialog
       open
       onOpenChange={(open) => {
+        // 仅在「发现新版本」这一步允许被遮罩/返回键关闭（等同暂不更新）；
+        // 下载、安装、失败阶段保持弹窗，避免进度条一闪就没了。
         if (!open && phase === 'prompt') close()
       }}
     >
@@ -122,23 +136,37 @@ export function UpdateHost() {
             {phase === 'prompt' &&
               `发现新版本 v${info.version}（当前 v${APP_VERSION}）。\n${info.notes || '包含体验优化与问题修复。'}\n更新为覆盖安装，已有记录不会丢失。`}
             {phase === 'downloading' &&
-              '请在下载完成后按系统提示安装，期间请保持网络畅通。'}
+              '正在下载安装包，请保持网络畅通，完成后会弹出系统安装提示。'}
             {phase === 'installing' &&
-              '已拉起安装界面。安装完成后重新打开应用即可，原有记录仍在。'}
+              '下载完成，已拉起系统安装界面。安装完成后重新打开应用即可，原有记录仍在。'}
             {phase === 'failed' &&
               `自动更新失败${error ? `：${error}` : ''}。可前往发布页手动下载安装包。`}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {phase === 'downloading' && (
+        {inProgress && (
           <div className="space-y-2 py-1">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-primary/15">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-primary/15">
               <div
-                className="h-full rounded-full bg-primary transition-all duration-200"
-                style={{ width: `${percent}%` }}
+                className={
+                  'h-full rounded-full bg-primary transition-all duration-200' +
+                  (known || phase === 'installing' ? '' : ' animate-pulse')
+                }
+                style={{ width: `${phase === 'installing' ? 100 : known ? percent : 15}%` }}
               />
             </div>
-            <p className="text-right text-xs text-muted-foreground">{percent}%</p>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>
+                {phase === 'installing'
+                  ? '下载完成，等待安装…'
+                  : known
+                    ? `已下载 ${mb(bytes.received)} / ${mb(bytes.total)}`
+                    : '正在连接下载…'}
+              </span>
+              <span className="tabular-nums">
+                {phase === 'downloading' && known ? `${percent}%` : ''}
+              </span>
+            </div>
           </div>
         )}
 
@@ -151,22 +179,32 @@ export function UpdateHost() {
         <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
           {phase === 'prompt' && (
             <>
-              <AlertDialogCancel onClick={close}>暂不更新</AlertDialogCancel>
-              <AlertDialogAction onClick={startUpdate}>立即更新</AlertDialogAction>
+              <Button type="button" variant="outline" onClick={close}>
+                暂不更新
+              </Button>
+              <Button type="button" onClick={startUpdate}>
+                立即更新
+              </Button>
             </>
           )}
           {phase === 'downloading' && (
-            <Button variant="outline" disabled className="w-full sm:w-auto">
+            <Button type="button" variant="outline" disabled className="w-full sm:w-auto">
               下载中…
             </Button>
           )}
           {phase === 'installing' && (
-            <AlertDialogAction onClick={close}>知道了</AlertDialogAction>
+            <Button type="button" onClick={close}>
+              知道了
+            </Button>
           )}
           {phase === 'failed' && (
             <>
-              <AlertDialogCancel onClick={close}>稍后再说</AlertDialogCancel>
-              <AlertDialogAction onClick={manual}>前往手动更新</AlertDialogAction>
+              <Button type="button" variant="outline" onClick={close}>
+                稍后再说
+              </Button>
+              <Button type="button" onClick={manual}>
+                前往手动更新
+              </Button>
             </>
           )}
         </AlertDialogFooter>
