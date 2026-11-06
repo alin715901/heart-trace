@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -35,14 +37,19 @@ jobs:
       - name: 构建网页
         run: |
           cd 心迹-源码
+          CODE=${{ github.run_number }}
           npm install
           rm -f public/*.apk
-          NETLIFY=1 npm run build
+          cat > public/version.json <<EOF
+          {"version":"1.0","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 新版本，包含体验优化"}
+          EOF
+          VITE_BUILD_CODE=${CODE} NETLIFY=1 npm run build
+          echo "版本清单:" && cat public/version.json
 
       - name: 生成安卓工程
         run: |
           cd 心迹-源码
-          npm install -D @capacitor/cli @capacitor/core @capacitor/android
+          npm install -D "@capacitor/cli@^7" "@capacitor/android@^7"
           echo '{"appId":"com.xinji.hearttrace","appName":"心迹","webDir":"dist"}' > capacitor.config.json
           npx cap add android
           npx cap sync
@@ -55,7 +62,6 @@ jobs:
           echo "}" >> android/build.gradle
           sed -i 's#<string name="app_name">[^<]*</string>#<string name="app_name">心迹</string>#' android/app/src/main/res/values/strings.xml
           sed -i 's#<string name="title_activity_main">[^<]*</string>#<string name="title_activity_main">心迹</string>#' android/app/src/main/res/values/strings.xml
-          grep -E 'app_name|title_activity_main' android/app/src/main/res/values/strings.xml
           unzip -o android-icons.zip -d android/app/src/main/res/
           pip install --quiet pillow
           python3 - <<'PY'
@@ -77,22 +83,48 @@ jobs:
               print('shrunk', f, nw, nh)
           PY
           find android/app/src/main/res/values -type f -name '*.xml' -print0 | xargs -0 -r sed -i -E 's/(<color name="ic_launcher_background">)[^<]*(<\/color>)/\1#EFE9FF\2/g'
-          ls -l android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          # 固定签名密钥：保证每次构建签名一致，可直接覆盖安装
+          mkdir -p ~/.android
+          base64 -d debug.keystore.b64 > ~/.android/debug.keystore
+          keytool -list -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey > /dev/null && echo "签名密钥已固定"
+          # 应用内更新插件
+          PKG=android/app/src/main/java/com/xinji/hearttrace
+          cp android-extra/ApkUpdaterPlugin.java "$PKG/ApkUpdaterPlugin.java"
+          cp android-extra/MainActivity.java "$PKG/MainActivity.java"
+          mkdir -p android/app/src/main/res/xml
+          cp android-extra/file_paths.xml android/app/src/main/res/xml/file_paths.xml
+          python3 - <<'PY'
+          p = 'android/app/src/main/AndroidManifest.xml'
+          s = open(p, encoding='utf-8').read()
+          if 'REQUEST_INSTALL_PACKAGES' not in s:
+              s = s.replace('<application',
+                  '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n    <application', 1)
+          provider = open('android-extra/manifest-provider.xml', encoding='utf-8').read()
+          if 'fileprovider' not in s:
+              s = s.replace('</application>', provider + '    </application', 1)
+          open(p, 'w', encoding='utf-8').write(s)
+          print('manifest patched')
+          PY
+          grep -E 'REQUEST_INSTALL_PACKAGES|fileprovider' android/app/src/main/AndroidManifest.xml
+          ls -l "$PKG"
 
       - name: 构建APK
         run: |
           cd 心迹-源码/android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/心迹.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../dist/heart-trace.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../dist/心迹.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../public/heart-trace.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../public/心迹.apk
 
       - name: 上传安装包
         uses: actions/upload-artifact@v4
         with:
           name: xinji-apk
-          path: 心迹-源码/android/app/build/outputs/apk/debug/心迹.apk
+          path: 心迹-源码/android/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: 发布到下载页
+      - name: 发布到 Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -100,15 +132,24 @@ jobs:
           TAG="apk-${{ github.run_number }}"
           RID=$(curl -sS -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases"             -d "{\"tag_name\":\"${TAG}\",\"name\":\"心迹 安装包\"}"             | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
           echo "release id: ${RID}"
-          curl -sS -f -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Content-Type: application/octet-stream"             --data-binary "@${APK}"             "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RID}/assets?name=%E5%BF%83%E8%BF%B9.apk"
-          echo "上传完成: 心迹.apk"
+          curl -sS -f -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Content-Type: application/octet-stream"             --data-binary "@${APK}"             "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RID}/assets?name=heart-trace.apk"
+          echo "上传完成: heart-trace.apk"
 
-      - name: 更新网站下载文件
-        run: |
-          cp 心迹-源码/android/app/build/outputs/apk/debug/app-debug.apk 心迹-源码/public/心迹.apk
-          cp 心迹-源码/android/app/build/outputs/apk/debug/app-debug.apk 心迹-源码/public/heart-trace.apk
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f 心迹-源码/public/心迹.apk 心迹-源码/public/heart-trace.apk
-          git commit -m "更新：带心迹图标的安装包" || echo "无变更"
-          git push
+      - name: 上传网站产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 心迹-源码/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 部署到网站
+        id: deployment
+        uses: actions/deploy-pages@v4

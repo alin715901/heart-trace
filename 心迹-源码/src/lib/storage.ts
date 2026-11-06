@@ -10,6 +10,7 @@ import type {
 import { defaultSettings } from './seed'
 
 const KEY = 'xinji-data-v1'
+const BACKUP_KEY = 'xinji-data-backup-v1'
 
 function blankState(): DataState {
   return {
@@ -23,7 +24,19 @@ function blankState(): DataState {
 
 function load(): DataState {
   try {
-    const raw = localStorage.getItem(KEY)
+    let raw = localStorage.getItem(KEY)
+    if (!raw) {
+      // 覆盖安装或存储异常后，从备份自动恢复，避免记录丢失
+      const backup = localStorage.getItem(BACKUP_KEY)
+      if (backup) {
+        raw = backup
+        try {
+          localStorage.setItem(KEY, backup)
+        } catch {
+          /* 忽略存储异常 */
+        }
+      }
+    }
     if (!raw) return blankState()
     const parsed = JSON.parse(raw)
     const base = blankState()
@@ -66,7 +79,9 @@ const listeners = new Set<() => void>()
 
 function emit() {
   try {
-    localStorage.setItem(KEY, JSON.stringify(state))
+    const json = JSON.stringify(state)
+    localStorage.setItem(KEY, json)
+    localStorage.setItem(BACKUP_KEY, json)
   } catch (e) {
     console.warn('心迹：本地存储写入失败', e)
   }
