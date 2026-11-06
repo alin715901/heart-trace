@@ -50,6 +50,7 @@ jobs:
           echo "}" >> android/build.gradle
           sed -i 's#<string name="app_name">[^<]*</string>#<string name="app_name">心迹</string>#' android/app/src/main/res/values/strings.xml
           sed -i 's#<string name="title_activity_main">[^<]*</string>#<string name="title_activity_main">心迹</string>#' android/app/src/main/res/values/strings.xml
+          grep -E 'app_name|title_activity_main' android/app/src/main/res/values/strings.xml
 
       - name: 构建APK
         run: |
@@ -65,9 +66,12 @@ jobs:
           path: 心迹-源码/android/app/build/outputs/apk/debug/心迹.apk
 
       - name: 发布到下载页
-        continue-on-error: true
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: apk-${{ github.run_number }}
-          name: 心迹 安装包
-          files: 心迹-源码/android/app/build/outputs/apk/debug/心迹.apk
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          APK="心迹-源码/android/app/build/outputs/apk/debug/app-debug.apk"
+          TAG="apk-${{ github.run_number }}"
+          RID=$(curl -sS -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases"             -d "{\"tag_name\":\"${TAG}\",\"name\":\"心迹 安装包\"}"             | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
+          echo "release id: ${RID}"
+          curl -sS -f -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Content-Type: application/octet-stream"             --data-binary "@${APK}"             "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RID}/assets?name=%E5%BF%83%E8%BF%B9.apk"
+          echo "上传完成: 心迹.apk"
