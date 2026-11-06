@@ -288,7 +288,7 @@ function CardShell({
         className="alpha-card rounded-xl p-4 pl-5"
         style={{ borderLeft: `3px solid ${accent}` }}
       >
-        <div className="absolute right-3 top-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="absolute right-3 top-3 flex gap-1 transition-opacity md:opacity-0 md:group-hover:opacity-100">
           <Button size="icon-sm" variant="ghost" onClick={onEdit} className="text-muted-foreground">
             <Pencil className="size-3.5" />
           </Button>
