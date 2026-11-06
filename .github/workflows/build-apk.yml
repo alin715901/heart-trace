@@ -51,6 +51,9 @@ jobs:
           sed -i 's#<string name="app_name">[^<]*</string>#<string name="app_name">心迹</string>#' android/app/src/main/res/values/strings.xml
           sed -i 's#<string name="title_activity_main">[^<]*</string>#<string name="title_activity_main">心迹</string>#' android/app/src/main/res/values/strings.xml
           grep -E 'app_name|title_activity_main' android/app/src/main/res/values/strings.xml
+          unzip -o android-icons.zip -d android/app/src/main/res/
+          find android/app/src/main/res/values -type f -name '*.xml' -print0 | xargs -0 -r sed -i -E 's/(<color name="ic_launcher_background">)[^<]*(<\/color>)/\1#EFE9FF\2/g'
+          ls -l android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
       - name: 构建APK
         run: |
@@ -75,3 +78,13 @@ jobs:
           echo "release id: ${RID}"
           curl -sS -f -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Content-Type: application/octet-stream"             --data-binary "@${APK}"             "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RID}/assets?name=%E5%BF%83%E8%BF%B9.apk"
           echo "上传完成: 心迹.apk"
+
+      - name: 更新网站下载文件
+        run: |
+          cp 心迹-源码/android/app/build/outputs/apk/debug/app-debug.apk 心迹-源码/public/心迹.apk
+          cp 心迹-源码/android/app/build/outputs/apk/debug/app-debug.apk 心迹-源码/public/heart-trace.apk
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f 心迹-源码/public/心迹.apk 心迹-源码/public/heart-trace.apk
+          git commit -m "更新：带心迹图标的安装包" || echo "无变更"
+          git push
