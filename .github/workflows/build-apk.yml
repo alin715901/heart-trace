@@ -53,10 +53,33 @@ jobs:
       - name: 生成安卓工程
         run: |
           cd 心迹-源码
+          export CODE=${{ github.run_number }}
+          export VERSION="${APP_VERSION}"
           npm install -D "@capacitor/cli@^7" "@capacitor/android@^7"
           echo '{"appId":"com.xinji.hearttrace","appName":"心迹","webDir":"dist"}' > capacitor.config.json
           npx cap add android
           npx cap sync
+          # 系统安装器读取的是安卓工程里的 versionName / versionCode，
+          # 不更新的话覆盖安装会被提示「已安装相同版本 1.0」
+          python3 - <<'PY'
+          import os, re
+          p = 'android/app/build.gradle'
+          s = open(p, encoding='utf-8').read()
+          code, version = os.environ['CODE'], os.environ['VERSION']
+          if re.search(r'versionCode\s+\d+', s):
+              s = re.sub(r'(versionCode\s+)\d+', r'\g<1>' + code, s, count=1)
+          else:
+              s = s.replace('defaultConfig {', 'defaultConfig {\n        versionCode ' + code, 1)
+          if re.search(r'versionName\s+"[^"]*"', s):
+              s = re.sub(r'(versionName\s+)"[^"]*"', r'\g<1>"' + version + '"', s, count=1)
+          else:
+              s = s.replace('defaultConfig {', 'defaultConfig {\n        versionName "' + version + '"', 1)
+          open(p, 'w', encoding='utf-8').write(s)
+          assert re.search(r'versionCode\s+' + code + r'\b', s), 'versionCode 未写入'
+          assert 'versionName "' + version + '"' in s, 'versionName 未写入'
+          print('安卓版本号已写入:', version, '(' + code + ')')
+          PY
+          grep -E 'versionCode|versionName' android/app/build.gradle
           echo "" >> android/build.gradle
           echo "allprojects {" >> android/build.gradle
           echo "    configurations.all {" >> android/build.gradle
