@@ -1,9 +1,9 @@
 import { registerPlugin } from '@capacitor/core'
 
-/** 应用版本号（对外展示），由打包流程注入；本地开发回退到 1.0 */
-export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0'
-/** 当前安装包构建号，由打包流程注入；本地开发回退到 8 */
-export const BUILD_CODE = Number(import.meta.env.VITE_BUILD_CODE || 8)
+/** 应用版本号（对外展示），由打包流程注入；本地开发回退到 1.2.1 */
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.2.1'
+/** 当前安装包构建号，由打包流程注入；本地开发回退到 15 */
+export const BUILD_CODE = Number(import.meta.env.VITE_BUILD_CODE || 15)
 /** 线上版本清单 */
 export const VERSION_URL = 'https://alin715901.github.io/heart-trace/version.json'
 /** 手动检查到新版本后，通知全局弹窗展示 */
