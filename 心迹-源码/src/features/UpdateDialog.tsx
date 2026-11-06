@@ -134,7 +134,7 @@ export function UpdateHost() {
           </AlertDialogTitle>
           <AlertDialogDescription className="whitespace-pre-line">
             {phase === 'prompt' &&
-              `发现新版本 v${info.version}（当前 v${APP_VERSION}）。\n${info.notes || '包含体验优化与问题修复。'}\n更新为覆盖安装，已有记录不会丢失。`}
+              `${info.version === APP_VERSION ? `发现新版本 · 构建号 ${info.code}` : `发现新版本 v${info.version}`}（当前 v${APP_VERSION}）。\n${info.notes || '包含体验优化与问题修复。'}\n更新为覆盖安装，已有记录不会丢失。`}
             {phase === 'downloading' &&
               '正在下载安装包，请保持网络畅通，完成后会弹出系统安装提示。'}
             {phase === 'installing' &&

@@ -479,11 +479,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
           {/* 数据 */}
           <TabsContent value="data" className="flex flex-col gap-4 pt-2">
+            <VersionInfo />
             <p className="text-xs text-muted-foreground">
               当前共有 {entities.length} 个主体、{statusRecords.length + divinationRecords.length} 条记录。
               跨设备建议使用「备份(JSON)」整体迁移，或「CSV」在表格间传输。
             </p>
-            <VersionInfo />
             <p className="text-xs text-amber-600/90">
               合并数据会将同一个名字的数据合并，请仔细核对主体。
             </p>
@@ -492,19 +492,19 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             </p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="secondary" onClick={handleExportJSON}>
-                <Download className="size-4" />
+                <Upload className="size-4" />
                 导出备份 (JSON)
               </Button>
               <Button variant="secondary" onClick={() => jsonInput.current?.click()}>
-                <Upload className="size-4" />
+                <Download className="size-4" />
                 导入备份 (JSON)
               </Button>
               <Button variant="secondary" onClick={handleExportCSV}>
-                <Download className="size-4" />
+                <Upload className="size-4" />
                 导出 CSV
               </Button>
               <Button variant="secondary" onClick={() => csvInput.current?.click()}>
-                <Upload className="size-4" />
+                <Download className="size-4" />
                 导入 CSV
               </Button>
             </div>

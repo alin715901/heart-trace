@@ -45,7 +45,7 @@ jobs:
           npm install
           rm -f public/*.apk
           cat > public/version.json <<EOF
-          {"version":"${VERSION}","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 v${VERSION}：修复应用内更新进度条显示"}
+          {"version":"${VERSION}","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 v${VERSION}（构建号 ${CODE}）：调整设置页布局与导入导出图标"}
           EOF
           VITE_APP_VERSION=${VERSION} VITE_BUILD_CODE=${CODE} NETLIFY=1 npm run build
           echo "版本清单:" && cat public/version.json
@@ -148,11 +148,33 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APK="心迹-源码/android/app/build/outputs/apk/debug/app-debug.apk"
-          TAG="apk-${{ github.run_number }}"
-          RID=$(curl -sS -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Accept: application/vnd.github+json"             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases"             -d "{\"tag_name\":\"${TAG}\",\"name\":\"心迹 安装包\"}"             | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
+          export CODE=${{ github.run_number }}
+          export TAG="apk-${CODE}"
+          export NAME="心迹 v${APP_VERSION} · 构建号 ${CODE}"
+          export VERSION="${APP_VERSION}"
+          python3 - <<'PY'
+          import os, json
+          p = {
+              'tag_name': os.environ['TAG'],
+              'name': os.environ['NAME'],
+              'body': '心迹 v%s，构建号 %s。覆盖安装，已有记录不会丢失。' % (os.environ['VERSION'], os.environ['CODE']),
+          }
+          open('release.json', 'w', encoding='utf-8').write(json.dumps(p, ensure_ascii=False))
+          print('release payload:', p['name'])
+          PY
+          RID=$(curl -sS -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
+            -d @release.json \
+            | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
           echo "release id: ${RID}"
-          curl -sS -f -X POST             -H "Authorization: Bearer ${GH_TOKEN}"             -H "Content-Type: application/octet-stream"             --data-binary "@${APK}"             "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RID}/assets?name=heart-trace.apk"
-          echo "上传完成: heart-trace.apk"
+          curl -sS -f -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@${APK}" \
+            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RID}/assets?name=heart-trace.apk"
+          echo "上传完成: heart-trace.apk（v${APP_VERSION}）"
 
       - name: 重建网站产物
         run: |

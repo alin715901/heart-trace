@@ -4,16 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>心迹 · 下载安装包</title>
-<style>body{font-family:-apple-system,system-ui,sans-serif;background:#faf7f2;color:#3a332c;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:2rem}h1{font-size:2rem;letter-spacing:.35em;margin:0 0 .6rem}p{color:#8a7f72;line-height:1.8}a{color:#a9714b;font-weight:600}</style>
+<style>body{font-family:-apple-system,system-ui,sans-serif;background:#faf7f2;color:#3a332c;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:2rem}h1{font-size:2rem;letter-spacing:.35em;margin:0 0 .6rem}p{color:#8a7f72;line-height:1.8}a{color:#a9714b;font-weight:600}#ver{font-size:.9rem;color:#a9714b;font-weight:600;margin:0 0 .5rem}</style>
 </head>
 <body>
 <h1>心迹</h1>
+<p id="ver">正在读取版本信息…</p>
 <p>正在下载安装包…</p>
 <p>若未自动开始，请 <a id="dl" href="heart-trace.apk" download="心迹.apk">点此下载 心迹.apk</a></p>
-<script>document.getElementById('dl').click();</script>
-<!-- v2 -->
-<!-- icon -->
-<!-- fixed -->
+<script>
+fetch('version.json?t=' + Date.now()).then(function (r) { return r.json() }).then(function (v) {
+  document.getElementById('ver').textContent = '当前版本 v' + v.version + ' · 构建号 ' + v.code;
+}).catch(function () { document.getElementById('ver').textContent = ''; });
+document.getElementById('dl').click();
+</script>
 </body>
-<!-- icon-fixed 2026-11-06 -->
 </html>
