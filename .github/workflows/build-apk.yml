@@ -41,6 +41,13 @@ jobs:
           echo '{"appId":"com.xinji.hearttrace","appName":"心迹","webDir":"dist"}' > capacitor.config.json
           npx cap add android
           npx cap sync
+          echo "" >> android/build.gradle
+          echo "allprojects {" >> android/build.gradle
+          echo "    configurations.all {" >> android/build.gradle
+          echo "        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'" >> android/build.gradle
+          echo "        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'" >> android/build.gradle
+          echo "    }" >> android/build.gradle
+          echo "}" >> android/build.gradle
 
       - name: 构建APK
         run: |
