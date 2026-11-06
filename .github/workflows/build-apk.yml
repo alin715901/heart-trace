@@ -1,7 +1,7 @@
 name: 构建心迹APK
 
 env:
-  APP_VERSION: '1.2'
+  APP_VERSION: '1.2.1'
 
 on:
   workflow_dispatch:
@@ -45,7 +45,7 @@ jobs:
           npm install
           rm -f public/*.apk
           cat > public/version.json <<EOF
-          {"version":"${VERSION}","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 v${VERSION}（构建号 ${CODE}）：调整设置页布局与导入导出图标"}
+          {"version":"${VERSION}","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 v${VERSION}（构建号 ${CODE}）：版本号统一为 v${VERSION}，应用内、下载页与发布页显示一致"}
           EOF
           VITE_APP_VERSION=${VERSION} VITE_BUILD_CODE=${CODE} NETLIFY=1 npm run build
           echo "版本清单:" && cat public/version.json
