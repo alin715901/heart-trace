@@ -69,7 +69,7 @@ Windows 下可以先复制 `.env.example` 为 `.env`，在里面写 `VITE_BASE_P
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
 | `VITE_BASE_PATH` | `/` | 部署子路径 |
-| `VITE_APP_VERSION` | `1.2.1` | 设置里显示的版本文字，可改成你自己的 |
+| `VITE_APP_VERSION` | `1.2.2` | 设置里显示的版本文字，可改成你自己的 |
 | `VITE_BUILD_CODE` | `1` | 版本序号，仅自建安装包更新时用 |
 | `VITE_VERSION_URL` | 空 | 自建安装包更新源；留空则关闭应用内更新检查，不连接任何外部地址 |
 | `SINGLE_FILE` | 未设置 | 设为 `1` 可构建成单个 HTML 文件，方便离线保存或转发 |

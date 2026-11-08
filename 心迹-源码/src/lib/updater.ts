@@ -1,9 +1,9 @@
 import { registerPlugin } from '@capacitor/core'
 
-/** 应用版本号（对外展示），由打包流程注入；本地开发回退到 1.2.1 */
-export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.2.1'
-/** 当前安装包构建号，由打包流程注入；本地开发回退到 15 */
-export const BUILD_CODE = Number(import.meta.env.VITE_BUILD_CODE || 15)
+/** 应用版本号，正式发布由打包流程自动注入；此回退值仅供本地开发 */
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.2.2'
+/** 安装包构建号，正式发布由打包流程自动注入；此回退值仅供本地开发 */
+export const BUILD_CODE = Number(import.meta.env.VITE_BUILD_CODE || 17)
 /**
  * 应用内更新源（仅自建安卓安装包时才需要）。
  * 默认留空 = 关闭更新检查，不会连接任何外部地址；

@@ -1,7 +1,7 @@
 import { registerPlugin } from '@capacitor/core'
 
 /** 应用版本号（对外展示），可通过 .env 的 VITE_APP_VERSION 修改 */
-export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.2.1'
+export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.2.2'
 /** 版本序号，仅自建安装包更新时需要，可通过 VITE_BUILD_CODE 修改 */
 export const BUILD_CODE = Number(import.meta.env.VITE_BUILD_CODE || 1)
 /**

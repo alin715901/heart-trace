@@ -1,10 +1,12 @@
 name: 构建心迹APK
 
-env:
-  APP_VERSION: '1.2.1'
-
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: '指定版本号（留空则自动递增修订号，如 1.2.1 -> 1.2.2）'
+        required: false
+        default: ''
   push:
     branches: [main]
     paths:
@@ -21,6 +23,23 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
+
+      - name: 计算本次版本号
+        env:
+          MANUAL_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          cd 心迹-源码
+          PREV=$(python3 -c "import json;print(json.load(open('public/version.json'))['version'])")
+          if [ -n "$MANUAL_VERSION" ]; then
+            NEXT="$MANUAL_VERSION"
+          else
+            MAJOR=$(echo "$PREV" | cut -d. -f1)
+            MINOR=$(echo "$PREV" | cut -d. -f2)
+            PATCH=$(echo "$PREV" | cut -d. -f3)
+            NEXT="$MAJOR.$MINOR.$((PATCH + 1))"
+          fi
+          echo "APP_VERSION=$NEXT" >> "$GITHUB_ENV"
+          echo "上一个版本: $PREV  ->  本次版本: $NEXT（构建号 ${{ github.run_number }}）"
 
       - name: 安装 Node
         uses: actions/setup-node@v4
@@ -45,7 +64,7 @@ jobs:
           npm install
           rm -f public/*.apk
           cat > public/version.json <<EOF
-          {"version":"${VERSION}","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 v${VERSION}（构建号 ${CODE}）：整理开源版，部署路径与更新源改为可配置"}
+          {"version":"${VERSION}","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 v${VERSION}（构建号 ${CODE}）：体验优化与问题修复"}
           EOF
           VITE_APP_VERSION=${VERSION} VITE_BUILD_CODE=${CODE} VITE_VERSION_URL=https://alin715901.github.io/heart-trace/version.json VITE_BASE_PATH=/ npm run build
           echo "版本清单:" && cat public/version.json
