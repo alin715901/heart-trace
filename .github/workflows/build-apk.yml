@@ -45,9 +45,9 @@ jobs:
           npm install
           rm -f public/*.apk
           cat > public/version.json <<EOF
-          {"version":"${VERSION}","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 v${VERSION}（构建号 ${CODE}）：版本号统一为 v${VERSION}，应用内、下载页与发布页显示一致"}
+          {"version":"${VERSION}","code":${CODE},"apkUrl":"https://alin715901.github.io/heart-trace/heart-trace.apk","releaseUrl":"https://github.com/alin715901/heart-trace/releases/tag/apk-${CODE}","notes":"心迹 v${VERSION}（构建号 ${CODE}）：整理开源版，部署路径与更新源改为可配置"}
           EOF
-          VITE_APP_VERSION=${VERSION} VITE_BUILD_CODE=${CODE} NETLIFY=1 npm run build
+          VITE_APP_VERSION=${VERSION} VITE_BUILD_CODE=${CODE} VITE_VERSION_URL=https://alin715901.github.io/heart-trace/version.json VITE_BASE_PATH=/ npm run build
           echo "版本清单:" && cat public/version.json
 
       - name: 生成安卓工程
@@ -204,7 +204,7 @@ jobs:
           cd 心迹-源码
           # 网页部署在 /heart-trace/ 子路径，必须按子路径构建；
           # 前面的根路径产物仅供安装包内嵌网页使用
-          VITE_APP_VERSION=${APP_VERSION} VITE_BUILD_CODE=${{ github.run_number }} npm run build
+          VITE_APP_VERSION=${APP_VERSION} VITE_BUILD_CODE=${{ github.run_number }} VITE_BASE_PATH=/heart-trace/ npm run build
           test -s dist/heart-trace.apk
           test -s dist/version.json
           grep -q '/heart-trace/assets/' dist/index.html && echo "网页资源路径已修正"

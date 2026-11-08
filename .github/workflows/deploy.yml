@@ -27,7 +27,7 @@ jobs:
           npm install
           VERSION=$(python3 -c "import json;print(json.load(open('public/version.json'))['version'])")
           CODE=$(python3 -c "import json;print(json.load(open('public/version.json'))['code'])")
-          VITE_APP_VERSION=$VERSION VITE_BUILD_CODE=$CODE npm run build
+          VITE_APP_VERSION=$VERSION VITE_BUILD_CODE=$CODE VITE_BASE_PATH=/heart-trace/ npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

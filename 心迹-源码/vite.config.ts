@@ -6,7 +6,8 @@ import process from "process"
 import {viteSingleFile} from "vite-plugin-singlefile"
 
 const single = process.env.SINGLE_FILE === "1"
-const base = single ? "/" : (process.env.NETLIFY === "1" ? "/" : "/heart-trace/")
+// 默认部署在网站根目录；GitHub Pages 等子目录由自动构建流程注入 VITE_BASE_PATH
+const base = single ? "/" : (process.env.VITE_BASE_PATH || "/")
 
 // https://vite.dev/config/
 export default defineConfig({

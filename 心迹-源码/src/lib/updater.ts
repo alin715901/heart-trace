@@ -4,8 +4,12 @@ import { registerPlugin } from '@capacitor/core'
 export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.2.1'
 /** 当前安装包构建号，由打包流程注入；本地开发回退到 15 */
 export const BUILD_CODE = Number(import.meta.env.VITE_BUILD_CODE || 15)
-/** 线上版本清单 */
-export const VERSION_URL = 'https://alin715901.github.io/heart-trace/version.json'
+/**
+ * 应用内更新源（仅自建安卓安装包时才需要）。
+ * 默认留空 = 关闭更新检查，不会连接任何外部地址；
+ * 原作者的自动打包流程会通过 VITE_VERSION_URL 注入自己的地址。
+ */
+export const VERSION_URL = import.meta.env.VITE_VERSION_URL || ''
 /** 手动检查到新版本后，通知全局弹窗展示 */
 export const SHOW_UPDATE_EVENT = 'xinji-show-update'
 
@@ -56,6 +60,7 @@ export function isNativeAndroid(): boolean {
 
 /** 读取线上版本清单（仅原生环境可用） */
 async function readRemoteInfo(): Promise<UpdateInfo | null> {
+  if (!VERSION_URL) return null
   const { text } = await ApkUpdater.fetchJson({
     url: VERSION_URL + '?t=' + Date.now(),
   })
@@ -66,7 +71,7 @@ async function readRemoteInfo(): Promise<UpdateInfo | null> {
 
 /** 启动时的自动检查：没有新版本或网络异常都静默跳过 */
 export async function checkUpdate(): Promise<UpdateInfo | null> {
-  if (!isNativeAndroid()) return null
+  if (!VERSION_URL || !isNativeAndroid()) return null
   try {
     const info = await readRemoteInfo()
     return info && info.code > BUILD_CODE ? info : null
@@ -82,6 +87,7 @@ export type ManualCheckResult =
 
 /** 手动检查版本：区分「有更新 / 已是最新 / 检查失败」，便于给出明确反馈 */
 export async function checkUpdateManual(): Promise<ManualCheckResult> {
+  if (!VERSION_URL) return { status: 'latest' }
   try {
     const info = await readRemoteInfo()
     if (!info) return { status: 'error', message: '版本信息格式不正确' }
